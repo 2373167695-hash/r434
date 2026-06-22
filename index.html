@@ -1841,128 +1841,148 @@ function showExamYear(year) {
 
 function showGraph() {
   document.getElementById('bc').innerHTML = '<span>🕸️ 知识图谱</span>';
-  // Build nodes from KNOWLEDGE
   var nodes = [], nodeMap = {};
   var modColors = {'国际贸易':'#7c3aed','国际投资与跨国公司':'#2563eb','国际金融':'#059669','新兴议题':'#ea580c'};
+  var modLight = {'国际贸易':'#ede9fe','国际投资与跨国公司':'#dbeafe','国际金融':'#d1fae5','新兴议题':'#ffedd5'};
   for (var k in KNOWLEDGE) {
     var item = KNOWLEDGE[k];
     var mod = (item.module||'').split('/')[0];
-    // Count exam frequency
     var examCount = 0;
-    if (item.exam) {
-      var matches = item.exam.match(/\d{4}/g);
-      examCount = matches ? matches.length : 0;
-    }
-    var viewed = knowledgeViews[k] ? 1 : 0;
-    nodes.push({id:k, label:k, module:mod, color:modColors[mod]||'#888', size:15+examCount*3, examCount:examCount, viewed:viewed});
+    if (item.exam) { var m = item.exam.match(/\d{4}/g); examCount = m ? m.length : 0; }
+    nodes.push({id:k, label:k, module:mod, color:modColors[mod]||'#888', lightColor:modLight[mod]||'#f3f4f6', size:12+Math.min(examCount,6)*2.5, examCount:examCount, viewed:knowledgeViews[k]?1:0});
     nodeMap[k] = nodes.length-1;
   }
-  // Build edges: 1) Theory evolution (from related field) 2) Exam co-occurrence
   var edges = [], edgeSet = {};
-  function addEdge(s, t, type, weight) {
-    if (!nodeMap[s] || !nodeMap[t] || s===t) return;
-    var key = s < t ? s+'|'+t : t+'|'+s;
-    if (edgeSet[key]) { edgeSet[key].weight += weight; return; }
-    edgeSet[key] = {source:s, target:t, type:type, weight:weight};
-    edges.push(edgeSet[key]);
+  function addEdge(s,t,type,w) {
+    if(!nodeMap[s]||!nodeMap[t]||s===t)return;
+    var key=s<t?s+'|'+t:t+'|'+s;
+    if(edgeSet[key]){edgeSet[key].weight+=w;return;}
+    edgeSet[key]={source:s,target:t,type:type,weight:w};edges.push(edgeSet[key]);
   }
-  // Exam co-occurrence: same question references multiple knowledge tags
-  DATA.forEach(function(q) {
-    var tags = q.knowledge || [];
-    for (var i=0;i<tags.length;i++) {
-      for (var j=i+1;j<tags.length;j++) {
-        // Find actual knowledge keys that match these tags
-        var k1=null, k2=null;
-        for (var k in KNOWLEDGE) {
-          if (k.indexOf(tags[i])>=0 || tags[i].indexOf(k)>=0) { k1 = k1 || k; }
-          if (k.indexOf(tags[j])>=0 || tags[j].indexOf(k)>=0) { k2 = k2 || k; }
-        }
-        if (k1 && k2) addEdge(k1, k2, 'coexam', 1);
+  DATA.forEach(function(q){var tags=q.knowledge||[];for(var i=0;i<tags.length;i++)for(var j=i+1;j<tags.length;j++){var k1=null,k2=null;for(var k in KNOWLEDGE){if(k.indexOf(tags[i])>=0||tags[i].indexOf(k)>=0)k1=k1||k;if(k.indexOf(tags[j])>=0||tags[j].indexOf(k)>=0)k2=k2||k;}if(k1&&k2)addEdge(k1,k2,'coexam',1);}});
+  if(KNOWLEDGE_NAV&&KNOWLEDGE_NAV.sections)KNOWLEDGE_NAV.sections.forEach(function(p){(p.chapters||[]).forEach(function(c){(c.groups||[]).forEach(function(g){var ts=g.topics||[];for(var i=0;i<ts.length-1;i++)addEdge(ts[i].key,ts[i+1].key,'evolution',2);});});});
+  // Layout: cluster by module, then force simulation
+  var w=960,h=640,cx=w/2,cy=h/2;
+  var modList=['国际贸易','国际投资与跨国公司','国际金融','新兴议题'];
+  var modCenters={};
+  modList.forEach(function(m,i){var a=(i/modList.length)*2*Math.PI-Math.PI/2;modCenters[m]={x:cx+Math.cos(a)*160,y:cy+Math.sin(a)*120};});
+  nodes.forEach(function(n,i){
+    var mc=modCenters[n.module]||{x:cx,y:cy};
+    var a=(i/nodes.length)*2*Math.PI;
+    n.x=mc.x+Math.cos(a)*60+(Math.random()-0.5)*30;
+    n.y=mc.y+Math.sin(a)*60+(Math.random()-0.5)*30;
+    n.vx=0;n.vy=0;
+  });
+  // Force simulation with better params
+  for(var iter=0;iter<150;iter++){
+    for(var i=0;i<nodes.length;i++){
+      for(var j=i+1;j<nodes.length;j++){
+        var dx=nodes[j].x-nodes[i].x,dy=nodes[j].y-nodes[i].y;
+        var d=Math.sqrt(dx*dx+dy*dy)||1;
+        var f=1200/(d*d);
+        nodes[i].vx-=f*dx/d;nodes[i].vy-=f*dy/d;
+        nodes[j].vx+=f*dx/d;nodes[j].vy+=f*dy/d;
       }
     }
-  });
-  // Theory evolution: sequential within same group in KNOWLEDGE_NAV
-  if (KNOWLEDGE_NAV && KNOWLEDGE_NAV.sections) {
-    KNOWLEDGE_NAV.sections.forEach(function(part) {
-      (part.chapters||[]).forEach(function(ch) {
-        (ch.groups||[]).forEach(function(grp) {
-          var topics = grp.topics || [];
-          for (var i=0;i<topics.length-1;i++) {
-            addEdge(topics[i].key, topics[i+1].key, 'evolution', 2);
-          }
-        });
-      });
+    edges.forEach(function(e){
+      var ni=nodes[nodeMap[e.source]],nj=nodes[nodeMap[e.target]];
+      var dx=nj.x-ni.x,dy=nj.y-ni.y;
+      var d=Math.sqrt(dx*dx+dy*dy)||1;
+      var f=(d-100)*0.015*e.weight;
+      ni.vx+=f*dx/d;ni.vy+=f*dy/d;
+      nj.vx-=f*dx/d;nj.vy-=f*dy/d;
+    });
+    // Module cluster gravity
+    nodes.forEach(function(n){
+      var mc=modCenters[n.module]||{x:cx,y:cy};
+      n.vx+=(mc.x-n.x)*0.01;n.vy+=(mc.y-n.y)*0.01;
+      n.vx+=(cx-n.x)*0.002;n.vy+=(cy-n.y)*0.002;
+      n.x+=n.vx*0.3;n.y+=n.vy*0.3;
+      n.vx*=0.82;n.vy*=0.82;
+      n.x=Math.max(50,Math.min(w-50,n.x));
+      n.y=Math.max(50,Math.min(h-50,n.y));
     });
   }
-  // Render with D3-like force simulation (simplified SVG)
-  var w = 900, h = 600;
-  // Simple circular layout as fallback
-  var cx = w/2, cy = h/2, r = 220;
-  nodes.forEach(function(n,i) {
-    var angle = (i / nodes.length) * 2 * Math.PI;
-    n.x = cx + Math.cos(angle) * r + (Math.random()-0.5)*40;
-    n.y = cy + Math.sin(angle) * r + (Math.random()-0.5)*40;
-    n.vx = 0; n.vy = 0;
+  // Build SVG with gradients and filters
+  var h2='<div class="hero"><h1>🕸️ 知识图谱</h1><div class="desc">48个知识点的关联网络。节点大小=考察频次，颜色=所属模块，连线=理论演进/真题共现。点击节点跳转详情。</div></div>';
+  // Legend card
+  h2+='<div class="pcard" style="margin-bottom:16px"><div class="pcard-body" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;font-size:12px">';
+  modList.forEach(function(m){
+    h2+='<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:'+modColors[m]+';box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>'+m+'</span>';
   });
-  // Simple force simulation (10 iterations)
-  for (var iter=0; iter<80; iter++) {
-    // Repulsion between nodes
-    for (var i=0;i<nodes.length;i++) {
-      for (var j=i+1;j<nodes.length;j++) {
-        var dx = nodes[j].x - nodes[i].x, dy = nodes[j].y - nodes[i].y;
-        var dist = Math.sqrt(dx*dx+dy*dy) || 1;
-        var force = 800 / (dist*dist);
-        nodes[i].vx -= force * dx/dist; nodes[i].vy -= force * dy/dist;
-        nodes[j].vx += force * dx/dist; nodes[j].vy += force * dy/dist;
-      }
-    }
-    // Attraction along edges
-    edges.forEach(function(e) {
-      var ni = nodes[nodeMap[e.source]], nj = nodes[nodeMap[e.target]];
-      var dx = nj.x - ni.x, dy = nj.y - ni.y;
-      var dist = Math.sqrt(dx*dx+dy*dy) || 1;
-      var force = (dist - 120) * 0.02 * e.weight;
-      ni.vx += force * dx/dist; ni.vy += force * dy/dist;
-      nj.vx -= force * dx/dist; nj.vy -= force * dy/dist;
-    });
-    // Center gravity
-    nodes.forEach(function(n) {
-      n.vx += (cx - n.x) * 0.005;
-      n.vy += (cy - n.y) * 0.005;
-      n.x += n.vx * 0.5; n.y += n.vy * 0.5;
-      n.vx *= 0.85; n.vy *= 0.85;
-      // Boundary
-      n.x = Math.max(40, Math.min(w-40, n.x));
-      n.y = Math.max(40, Math.min(h-40, n.y));
-    });
-  }
-  // Build SVG
-  var h2 = '<div class="hero"><h1>🕸️ 知识图谱</h1><div class="desc">48个知识点的关联可视化。节点大小=考察频次，颜色=模块，连线=理论演进/真题共现。点击节点跳转。</div></div>';
-  h2 += '<div style="display:flex;gap:12px;margin:12px 0;flex-wrap:wrap;font-size:12px">';
-  h2 += '<span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#7c3aed;vertical-align:middle"></span> 国际贸易</span>';
-  h2 += '<span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#2563eb;vertical-align:middle"></span> 国际投资</span>';
-  h2 += '<span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#059669;vertical-align:middle"></span> 国际金融</span>';
-  h2 += '<span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ea580c;vertical-align:middle"></span> 新兴议题</span>';
-  h2 += '<span style="color:var(--ts)">连线粗细=关联强度</span></div>';
-  h2 += '<div style="overflow-x:auto"><svg width="'+w+'" height="'+h+'" style="background:#fafaf7;border-radius:12px;border:1px solid var(--bdr);max-width:100%">';
-  // Edges
-  edges.forEach(function(e) {
-    var ni = nodes[nodeMap[e.source]], nj = nodes[nodeMap[e.target]];
-    var ec = e.type==='evolution' ? '#c4b5fd' : '#d1d5db';
-    h2 += '<line x1="'+ni.x.toFixed(0)+'" y1="'+ni.y.toFixed(0)+'" x2="'+nj.x.toFixed(0)+'" y2="'+nj.y.toFixed(0)+'" stroke="'+ec+'" stroke-width="'+Math.min(e.weight*1.5,4)+'" opacity="0.5"/>';
+  h2+='<span style="color:var(--ts);margin-left:auto">📍 绿色光环=已浏览 · 线条粗细=关联强度</span></div></div>';
+  // SVG with defs
+  h2+='<div style="overflow-x:auto;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.06)"><svg width="'+w+'" height="'+h+'" style="background:linear-gradient(135deg,#fafaf7,#f5f3ef);border-radius:14px;max-width:100%" id="graphSvg">';
+  h2+='<defs>';
+  modList.forEach(function(m){
+    h2+='<radialGradient id="grad-'+m.substring(0,2)+'"><stop offset="0%" stop-color="'+modLight[m]+'" stop-opacity="0.9"/><stop offset="100%" stop-color="'+modColors[m]+'" stop-opacity="0.7"/></radialGradient>';
+  });
+  h2+='<filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+  h2+='</defs>';
+  // Edges (curved)
+  edges.forEach(function(e){
+    var ni=nodes[nodeMap[e.source]],nj=nodes[nodeMap[e.target]];
+    var mx=(ni.x+nj.x)/2,my=(ni.y+nj.y)/2;
+    var dx=nj.x-ni.x,dy=nj.y-ni.y;
+    var perpX=-dy*0.08,perpY=dx*0.08;
+    var ec=e.type==='evolution'?'#a78bfa':'#cbd5e1';
+    var ew=Math.min(e.weight*1.2,3.5);
+    h2+='<path d="M'+ni.x.toFixed(1)+' '+ni.y.toFixed(1)+' Q'+(mx+perpX).toFixed(1)+' '+(my+perpY).toFixed(1)+' '+nj.x.toFixed(1)+' '+nj.y.toFixed(1)+'" stroke="'+ec+'" stroke-width="'+ew+'" fill="none" opacity="0.35" class="graph-edge" data-source="'+e.source.replace(/"/g,'&quot;')+'" data-target="'+e.target.replace(/"/g,'&quot;')+'"/>';
   });
   // Nodes
-  nodes.forEach(function(n) {
-    var ring = n.viewed ? '#4CAF50' : 'none';
-    h2 += '<g style="cursor:pointer" onclick="navigateByKnowledge(\''+n.id.replace(/'/g,"\\'")+'\')">';
-    if (ring !== 'none') h2 += '<circle cx="'+n.x.toFixed(0)+'" cy="'+n.y.toFixed(0)+'" r="'+(n.size+3)+'" fill="none" stroke="'+ring+'" stroke-width="2" opacity="0.6"/>';
-    h2 += '<circle cx="'+n.x.toFixed(0)+'" cy="'+n.y.toFixed(0)+'" r="'+n.size+'" fill="'+n.color+'" opacity="0.85"><title>'+n.label+' ('+n.examCount+'次考察)</title></circle>';
-    h2 += '<text x="'+n.x.toFixed(0)+'" y="'+(n.y+n.size+12).toFixed(0)+'" text-anchor="middle" font-size="9" fill="#555" style="pointer-events:none">'+n.label.substring(0,6)+'</text>';
-    h2 += '</g>';
+  nodes.forEach(function(n){
+    var gradId='grad-'+n.module.substring(0,2);
+    h2+='<g class="graph-node" style="cursor:pointer" data-id="'+n.id.replace(/"/g,'&quot;')+'" onclick="navigateByKnowledge(\''+n.id.replace(/'/g,"\\'")+'\')">';
+    // Outer ring for viewed
+    if(n.viewed) h2+='<circle cx="'+n.x.toFixed(1)+'" cy="'+n.y.toFixed(1)+'" r="'+(n.size+4)+'" fill="none" stroke="#10b981" stroke-width="1.5" opacity="0.5" stroke-dasharray="3 2"/>';
+    // Shadow
+    h2+='<circle cx="'+n.x.toFixed(1)+'" cy="'+(n.y+2).toFixed(1)+'" r="'+n.size+'" fill="rgba(0,0,0,0.1)" filter="url(#glow)"/>';
+    // Main node
+    h2+='<circle cx="'+n.x.toFixed(1)+'" cy="'+n.y.toFixed(1)+'" r="'+n.size+'" fill="url(#'+gradId+')" stroke="'+n.color+'" stroke-width="1.5" class="graph-circle" data-id="'+n.id.replace(/"/g,'&quot;')+'"><title>'+n.label+' ('+n.examCount+'次考察)</title></circle>';
+    // Label
+    var fs=n.size>18?10:8;
+    h2+='<text x="'+n.x.toFixed(1)+'" y="'+(n.y+n.size+12).toFixed(1)+'" text-anchor="middle" font-size="'+fs+'" fill="#4b5563" style="pointer-events:none;font-weight:600">'+n.label.substring(0,7)+'</text>';
+    h2+='</g>';
   });
-  h2 += '</svg></div>';
-  h2 += '<div style="margin-top:12px;font-size:12px;color:var(--ts)">共 '+nodes.length+' 个知识点，'+edges.length+' 条关联。绿色环=已浏览。</div>';
-  document.getElementById('ct').innerHTML = h2;
+  h2+='</svg></div>';
+  // Stats
+  var viewedCount=nodes.filter(function(n){return n.viewed;}).length;
+  var hubNode=nodes.slice().sort(function(a,b){var ae=edges.filter(function(e){return e.source===a.id||e.target===a.id;}).length;var be=edges.filter(function(e){return e.source===b.id||e.target===b.id;}).length;return be-ae;})[0];
+  h2+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px">';
+  h2+='<div class="pcard" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:var(--pu)">'+nodes.length+'</div><div style="font-size:11px;color:var(--ts)">知识点</div></div>';
+  h2+='<div class="pcard" style="text-align:center;padding:14px"><div style="font-size:24px;font-weight:700;color:#10b981">'+viewedCount+'/'+nodes.length+'</div><div style="font-size:11px;color:var(--ts)">已浏览</div></div>';
+  h2+='<div class="pcard" style="text-align:center;padding:14px"><div style="font-size:14px;font-weight:700;color:var(--or)">'+(hubNode?hubNode.label:'-')+'</div><div style="font-size:11px;color:var(--ts)">核心枢纽节点</div></div>';
+  h2+='</div>';
+  document.getElementById('ct').innerHTML=h2;
+  // Hover interactions
+  var svg=document.getElementById('graphSvg');
+  if(svg){
+    svg.querySelectorAll('.graph-node').forEach(function(g){
+      g.addEventListener('mouseenter',function(){
+        var id=this.dataset.id;
+        svg.querySelectorAll('.graph-edge').forEach(function(e){
+          if(e.dataset.source===id||e.dataset.target===id){e.style.opacity='0.8';e.style.strokeWidth=parseFloat(e.getAttribute('stroke-width'))*2;}
+          else e.style.opacity='0.08';
+        });
+        svg.querySelectorAll('.graph-circle').forEach(function(c){
+          if(c.dataset.id!==id)c.style.opacity='0.25';
+        });
+      });
+      g.addEventListener('mouseleave',function(){
+        svg.querySelectorAll('.graph-edge').forEach(function(e){e.style.opacity='0.35';e.style.strokeWidth='';});
+        svg.querySelectorAll('.graph-circle').forEach(function(c){c.style.opacity='1';});
+      });
+    });
+    // Fade-in animation
+    svg.querySelectorAll('.graph-node').forEach(function(g,i){
+      g.style.opacity='0';g.style.transition='opacity .4s ease';
+      setTimeout(function(){g.style.opacity='1';},i*20);
+    });
+    svg.querySelectorAll('.graph-edge').forEach(function(e,i){
+      e.style.opacity='0';e.style.transition='opacity .6s ease';
+      setTimeout(function(){e.style.opacity='0.35';},500+i*10);
+    });
+  }
 }
 
 function showCards() {
