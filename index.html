@@ -2102,7 +2102,7 @@ function showCards() {
     var log = cardLog[kn] || {};
     var isDue = !log.date || (new Date() - new Date(log.date)) > (log.interval || 1) * 86400000;
     if (isDue) dueCount++;
-    var front='<div style="display:flex;justify-content:space-between;align-items:center"><span>'+kn+'</span>'+(isDue?'<span style="font-size:10px;color:#f44336">待复习</span>':'<span style="font-size:10px;color:#4CAF50">已复习(间隔'+prev.interval+'天)</span>')+'</div>';
+    var front='<div style="display:flex;justify-content:space-between;align-items:center"><span>'+kn+'</span>'+(isDue?'<span style="font-size:10px;color:#f44336">待复习</span>':'<span style="font-size:10px;color:#4CAF50">已复习(间隔'+(log.interval||1)+'天)</span>')+'</div>';
     var back='';
     if(item.overview)back+='<p style="margin:0 0 8px">'+item.overview+'</p>';
     if(item.key&&item.key.length)back+='<p style="margin:0 0 4px"><strong>要点：</strong><br>'+item.key.slice(0,3).join('<br>')+'</p>';
