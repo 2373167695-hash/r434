@@ -567,8 +567,9 @@ function showKnContent(key, topicName) {
     related.forEach(function(r) { h += '<span class="rt" onclick="navigateByKnowledge(\'' + r.replace(/'/g,"\\'") + '\')">' + r + '</span>'; });
     h += '</div>';
   }
-  h += '<div style="margin:20px 0;text-align:center"><button class="btn" style="background:var(--pu);color:#fff" onclick="aiGenerateQuestion(\'' + title.replace(/'/g,"\\'") + '\')">🤖 AI出题</button></div>';
+  h += '<div style="margin:20px 0;text-align:center;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" style="background:var(--pu);color:#fff" onclick="aiGenerateQuestion(\'' + title.replace(/'/g,"\\'") + '\')">🤖 AI出题</button><button class="btn" style="background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none" onclick="aiExplain(\'' + title.replace(/'/g,"\\'") + '\')">🎓 深度讲解</button></div>';
   h += '<div id="aiQuestions" style="display:none;margin-top:20px"><div class="pcard"><div class="pcard-hdr"><h3>🤖 AI生成的模拟题</h3></div><div class="pcard-body"><div id="aiQuestionsContent" style="font-size:14px;line-height:1.9"></div></div></div></div>';
+  h += '<div id="aiExplain" style="display:none;margin-top:20px"><div class="pcard"><div class="pcard-hdr"><h3>🎓 AI深度讲解</h3><button onclick="document.getElementById(\'aiExplain\').style.display=\'none\'" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--ts)">✕</button></div><div class="pcard-body"><div id="aiExplainContent" style="font-size:14px;line-height:1.9"></div><div id="aiExplainFollowup" style="margin-top:12px;display:none"><div style="display:flex;gap:6px"><input id="aiExplainInput" placeholder="追问：这个理论哪里还不懂？" style="flex:1;padding:8px 12px;border:1px solid var(--bdr);border-radius:8px;font-size:13px" onkeypress="if(event.key===\'Enter\')aiExplainFollowup()"><button onclick="aiExplainFollowup()" style="padding:8px 16px;background:var(--pu);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">追问</button></div></div></div></div></div>';
   document.getElementById('ct').innerHTML = h;
   document.getElementById('ct').scrollTop = 0;
 }
@@ -1254,6 +1255,10 @@ function showPredictions() {
   document.getElementById("bc").innerHTML = '<span>🎯 学术热点预测</span>';
   var h = '<div class="hero"><h1>🎯 学术热点与考点预测</h1>' +
     '<div class="desc">基于两院导师最新论文、学术讲座、研究方向，预测2027年434考试可能出题方向。每个预测都关联了历年真题。</div></div>';
+  // AI个性化预测按钮
+  var doneQ = DATA.filter(function(q) { return marks[q.id] && marks[q.id].done; }).length;
+  var viewedKN = Object.keys(knowledgeViews).length;
+  h += '<div style="margin:16px 0;text-align:center"><button onclick="aiPredictExam()" style="background:linear-gradient(135deg,var(--pu),#9333ea);color:#fff;border:none;padding:14px 32px;border-radius:10px;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,.3)">🤖 AI个性化真题预测</button><div style="font-size:11px;color:var(--ts);margin-top:4px">基于你的学习进度（'+doneQ+'/'+DATA.length+'题已做）+13年真题规律+学术热点</div></div><div id="aiPredict" style="display:none"><div class="pcard"><div class="pcard-hdr"><h3>🤖 AI预测报告</h3></div><div class="pcard-body"><div id="aiPredictContent" style="line-height:1.8"></div></div></div></div>';
   PREDICTIONS.forEach(function(p) {
     var probClass = p.probability.indexOf("★★★") >= 0 ? "prob-high" : "prob-med";
     h += '<div class="pcard"><div class="pcard-hdr"><h3>' + p.topic + '</h3>' +
@@ -1274,6 +1279,41 @@ function showPredictions() {
     h += '</div></div></div></div>';
   });
   document.getElementById("ct").innerHTML = h;
+}
+
+function aiPredictExam() {
+  var div = document.getElementById('aiPredict');
+  var content = document.getElementById('aiPredictContent');
+  div.style.display = 'block';
+  content.innerHTML = '⏳ AI正在分析13年真题规律和你的学习进度...';
+  content.scrollIntoView({behavior:'smooth'});
+  // Build context: year×module frequency
+  var modules = ['国际贸易','国际投资与跨国公司','国际金融','新兴议题'];
+  var ymMap = {};
+  [2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023].forEach(function(y){ymMap[y]={};modules.forEach(function(m){ymMap[y][m]=0;});});
+  DATA.forEach(function(q){
+    (q.knowledge||[]).forEach(function(k){
+      var mod='';
+      if(k.indexOf('国际贸易')>=0)mod='国际贸易';
+      else if(k.indexOf('跨国')>=0||k.indexOf('国际商务')>=0)mod='国际投资与跨国公司';
+      else if(k.indexOf('国际金融')>=0)mod='国际金融';
+      else mod='新兴议题';
+      if(ymMap[q.year]&&ymMap[q.year][mod]!==undefined)ymMap[q.year][mod]++;
+    });
+  });
+  var trendStr = modules.map(function(m){
+    var recent = ymMap[2021][m]+ymMap[2022][m]+ymMap[2023][m];
+    return m+':近3年'+recent+'次';
+  }).join('；');
+  var doneQ = DATA.filter(function(q) { return marks[q.id] && marks[q.id].done; }).length;
+  var viewedKN = Object.keys(knowledgeViews).length;
+  var weakModules = modules.filter(function(m){
+    var viewed = 0, total = 0;
+    for(var k in KNOWLEDGE){if((KNOWLEDGE[k].module||'').indexOf(m)>=0){total++;if(knowledgeViews[k])viewed++;}}
+    return total>0 && viewed/total < 0.5;
+  });
+  var sys = '你是人大434国际商务考研命题预测专家。请基于以下数据生成2027年考试预测：\n\n【历年命题趋势】\n'+trendStr+'\n\n【考生当前进度】\n已做真题：'+doneQ+'/'+DATA.length+'\n已浏览知识点：'+viewedKN+'/48\n薄弱模块：'+(weakModules.join('、')||'无')+'\n\n【学术热点】\n'+PREDICTIONS.map(function(p){return p.topic+':'+p.predicted_q;}).join('；')+'\n\n请生成5个2027年最可能考察的方向，每个包含：\n1.考向名称 2.概率(高/中/低) 3.理由(结合趋势) 4.建议复习优先级(1-5星) 5.关联知识点\n\n用表格输出，最后给出冲刺建议。';
+  callDS([{role:'system',content:'你是考研命题预测专家，擅长从历年真题规律和学术热点中预测未来考向。请用中文回复。'},{role:'user',content:sys}],'aiPredictContent');
 }
 
 function showExamQ(qid) {
@@ -1516,16 +1556,16 @@ function aiGradeQuestion(qid, qid2) {
       if (item.key) ctx += '\n要点: ' + item.key.slice(0, 5).join('; ');
     }
   });
-  var sys = '你是人大434国际商务考研评分老师。请批改学生的答题。';
+  var sys = '你是人大434国际商务考研阅卷老师，批改标准严格。请批改学生答题并给出详细反馈。';
   sys += '\n\n【题目】（' + q.year + '年 第' + q.num + '题 ' + q.type + '）\n' + q.question;
   if (q.answer) sys += '\n\n【参考答案】\n' + q.answer;
   sys += '\n\n【相关知识点】' + ctx;
   sys += '\n\n【学生作答】\n' + answer;
-  sys += '\n\n请给出：1.评分(0-10分) 2.指出遗漏的知识点 3.改进建议。200字内。';
+  sys += '\n\n请按以下结构输出（用markdown）：\n## 一、评分\n总分XX/10分。各维度打分：知识点覆盖(X/4)、逻辑结构(X/3)、术语准确(X/2)、实际联系(X/1)\n\n## 二、遗漏知识点\n用表格列出：| 遗漏要点 | 应该这样写 |\n\n## 三、优化重写（85分水平）\n保留学生原有思路，但补全结构、术语和遗漏点，重写一份85分水平的答案。\n\n## 四、对照分析\n| 你的版本 | 优化版本 | 差异说明 |\n\n要求：客观、具体、可操作。';
   fetch('https://api.xiaomimimo.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + getAPIKey(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'mimo-v2.5-pro', messages: [{ role: 'user', content: sys }], stream: true, temperature: 0.3, max_tokens: 1024 })
+    body: JSON.stringify({ model: 'mimo-v2.5-pro', messages: [{ role: 'user', content: sys }], stream: true, temperature: 0.3, max_tokens: 4096 })
   }).then(function(r) { if (!r.ok) throw Error('HTTP ' + r.status); return r.body.getReader(); })
     .then(function(rd) {
       var b = '', t = '', d = new TextDecoder();
@@ -1963,6 +2003,41 @@ function closeAIPanel() {
   document.getElementById('ai-panel').classList.remove('open');
 }
 
+
+var aiExplainHistory = [];
+function aiExplain(knowledge) {
+  var div = document.getElementById('aiExplain');
+  var content = document.getElementById('aiExplainContent');
+  var followup = document.getElementById('aiExplainFollowup');
+  div.style.display = 'block';
+  followup.style.display = 'block';
+  content.innerHTML = '⏳ AI正在准备讲解...';
+  aiExplainHistory = [{role:'user',content:'请讲解知识点：'+knowledge}];
+  var kn = KNOWLEDGE[knowledge] || {};
+  var ctx = '';
+  if (kn.overview) ctx += '\n知识库概述：' + kn.overview;
+  if (kn.key) ctx += '\n核心要点：' + kn.key.join('；');
+  if (kn.formula) ctx += '\n公式：' + kn.formula;
+  if (kn.exam) ctx += '\n历年考察：' + kn.exam;
+  var sys = '你是人大434考研辅导老师，擅长用苏格拉底式教学法讲解知识点。要求：\n1.先用通俗类比引入\n2.再逐步深入核心逻辑\n3.用对比突出关键区别\n4.最后出2道判断题检验理解\n5.用中文，结构化输出\n\n知识库参考：'+ctx;
+  callDS([{role:'system',content:sys},{role:'user',content:'请讲解知识点：'+knowledge}],'aiExplainContent');
+}
+
+function aiExplainFollowup() {
+  var inp = document.getElementById('aiExplainInput');
+  var q = inp.value.trim();
+  if (!q) return;
+  inp.value = '';
+  var content = document.getElementById('aiExplainContent');
+  content.innerHTML += '<hr style="margin:12px 0;border:none;border-top:1px solid #e0ddd6"><div style="background:var(--pu);color:#fff;padding:8px 12px;border-radius:8px;margin-bottom:8px;font-size:13px">🙋 '+q+'</div><div id="aiExplainResp"></div>';
+  aiExplainHistory.push({role:'user',content:q});
+  var msgs = [{role:'system',content:'你是人大434考研辅导老师。基于之前的讲解继续回答学生的追问。用中文，结构化输出。'}];
+  aiExplainHistory.slice(-10).forEach(function(h){msgs.push({role:h.role,content:h.content});});
+  // Use sendChat-style streaming
+  var respEl = document.getElementById('aiExplainResp');
+  respEl.innerHTML = '⏳ 思考中...';
+  fetch(DS_URL,{method:'POST',headers:{Authorization:'Bearer '+getAPIKey(),'Content-Type':'application/json'},body:JSON.stringify({model:'mimo-v2.5-pro',messages:msgs,stream:true,temperature:0.3,max_tokens:2048})}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.body.getReader();}).then(function(rd){var b='',t='',d=new TextDecoder();function n(){rd.read().then(function(r){if(r.done){respEl.innerHTML=renderMarkdown(t);aiExplainHistory.push({role:'assistant',content:t});return;}b+=d.decode(r.value,{stream:true});var ls=b.split('\n');b=ls.pop()||'';ls.forEach(function(l){if(l.startsWith('data: ')){var dd=l.substring(6);if(dd=='[DONE]')return;try{var p=JSON.parse(dd);if(p.choices&&p.choices[0].delta){var x=p.choices[0].delta.content||'';if(x){t+=x;respEl.innerHTML=renderMarkdown(t);}}}catch(e){}}});n();})}n();}).catch(function(err){respEl.innerHTML='<span style=color:red>请求失败：'+err.message+'</span>';});
+}
 function getPageContext() {
   var ctx = {type:'home',label:'首页'};
   if(!curPath)return ctx;
