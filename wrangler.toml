@@ -1,0 +1,6 @@
+name = "r434-ai-proxy"
+main = "cloudflare-worker.js"
+compatibility_date = "2024-01-01"
+
+[[env]]
+# 不设自定义域名，用 workers.dev 子域名
