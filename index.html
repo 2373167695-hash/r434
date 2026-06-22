@@ -802,7 +802,7 @@ function showMacro() {
     if (t.knowledge_links && t.knowledge_links.length) {
       h += '<div class="hot-topic-kn">';
       t.knowledge_links.forEach(function(kl) {
-        h += '<span class="kn-tag" onclick="navigateByKnowledge(\'' + kl + '\')">📚 ' + kl + '</span>';
+        h += '<span class="kn-tag" onclick="navigateByKnowledge(\'' + kl.replace(/'/g,"\\'") + '\')">📚 ' + kl + '</span>';
       });
       h += '</div>';
     }
@@ -908,7 +908,7 @@ function renderDailyReport(report) {
         if (p.source) h += '<div class="tags"><span class="tag">来源: ' + p.source + '</span></div>';
         if (p.knowledge_link && p.knowledge_link.length) {
           h += '<div class="tags">';
-          p.knowledge_link.forEach(function(kl) { h += '<span class="tag link" onclick="navigateByKnowledge(\'' + kl + '\')">📚 ' + kl + '</span>'; });
+          p.knowledge_link.forEach(function(kl) { h += '<span class="tag link" onclick="navigateByKnowledge(\'' + kl.replace(/'/g,"\\'") + '\')">📚 ' + kl + '</span>'; });
           h += '</div>';
         }
         h += '</div>';
@@ -935,7 +935,7 @@ function renderDailyReport(report) {
         if (cb.market_impact) h += '<p style="margin-top:4px"><strong>市场影响:</strong> ' + cb.market_impact + '</p>';
         if (cb.knowledge_link && cb.knowledge_link.length) {
           h += '<div class="tags">';
-          cb.knowledge_link.forEach(function(kl) { h += '<span class="tag link" onclick="navigateByKnowledge(\'' + kl + '\')">📚 ' + kl + '</span>'; });
+          cb.knowledge_link.forEach(function(kl) { h += '<span class="tag link" onclick="navigateByKnowledge(\'' + kl.replace(/'/g,"\\'") + '\')">📚 ' + kl + '</span>'; });
           h += '</div>';
         }
         h += '</div>';
@@ -960,7 +960,7 @@ function renderDailyReport(report) {
       if (item.source) h += '<div class="tags"><span class="tag">来源: ' + item.source + '</span></div>';
       if (item.knowledge_link && item.knowledge_link.length) {
         h += '<div class="tags">';
-        item.knowledge_link.forEach(function(kl) { h += '<span class="tag link" onclick="navigateByKnowledge(\'' + kl + '\')">📚 ' + kl + '</span>'; });
+        item.knowledge_link.forEach(function(kl) { h += '<span class="tag link" onclick="navigateByKnowledge(\'' + kl.replace(/'/g,"\\'") + '\')">📚 ' + kl + '</span>'; });
         h += '</div>';
       }
       h += '</div>';
@@ -1513,7 +1513,7 @@ function showTopic(path, defaultTab) {
     });
     var curIdx = -1;
     for (var ti = 0; ti < flatTopics.length; ti++) {
-      if (flatTopics[ti].key === key || flatTopics[ti].name === topicName) { curIdx = ti; break; }
+      if (flatTopics[ti].key === tn || flatTopics[ti].name === tn) { curIdx = ti; break; }
     }
     if (curIdx >= 0) {
       h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:12px 16px;background:#fafaf7;border-radius:10px">';
@@ -1867,6 +1867,7 @@ function showExamYear(year) {
 
 
 // === AI Deep Integration Functions ===
+function callDS(msg, cid) { callDSFast(msg, cid); }
 
 function callDSFast(msg, cid) {
   var el = document.getElementById(cid);
@@ -1889,7 +1890,7 @@ function callDSFast(msg, cid) {
 function aiCardExplain(kn) {
   var el = document.getElementById('cardAI');
   if (!el) { el = document.createElement('div'); el.id = 'cardAI'; el.style.cssText = 'margin-top:8px;padding:10px;background:#f8f6f2;border-radius:8px;font-size:12px;line-height:1.7'; }
-  var parent = document.querySelector('.cback');
+  var parent = el.closest('.cback') || document.querySelector('.cback');
   if (parent) parent.appendChild(el);
   var ctx = (typeof buildAIContext === 'function') ? buildAIContext(kn) : '';
   var sys = '你是人大434考研辅导老师。请用通俗易懂的语言讲解这个知识点，要求：\n1.用一个生活中的类比引入\n2.核心逻辑3句话概括\n3.易混淆点对比\n4.一句话记忆口诀\n5.中文，200字内\n\n相关真题与语料：' + ctx;
@@ -2025,7 +2026,7 @@ function showGraph() {
   }
   var edgeSet = {};
   function addEdge(s,t,type,w) {
-    if(!G.nodeMap[s]||!G.nodeMap[t]||s===t)return;
+    if(G.nodeMap[s]===undefined||G.nodeMap[t]===undefined||s===t)return;
     var key=s<t?s+'|'+t:t+'|'+s;
     if(edgeSet[key]){edgeSet[key].weight+=w;return;}
     edgeSet[key]={source:s,target:t,type:type,weight:w};G.edges.push(edgeSet[key]);
@@ -2109,9 +2110,9 @@ function showCards() {
     if(item.exam)back+='<p style="margin:4px 0;color:var(--ts)"><small>📝 '+item.exam+'</small></p>';
     back+='<p style="margin-top:8px"><small><a href="javascript:void(0)" onclick="event.stopPropagation();navigateByKnowledge(\''+kn.replace(/'/g,"\\'")+'\')">打开完整页面→</a></small></p>';
     back+='<div style="margin-top:10px;display:flex;gap:6px;justify-content:center" onclick="event.stopPropagation()">'+
-      '<button onclick="event.stopPropagation();reviewCard(\''+kn+'\',0)" style="padding:4px 10px;background:#f44336;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">不认识</button>'+
-      '<button onclick="event.stopPropagation();reviewCard(\''+kn+'\',1)" style="padding:4px 10px;background:#FF9800;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">模糊</button>'+
-      '<button onclick="event.stopPropagation();reviewCard(\''+kn+'\',3)" style="padding:4px 10px;background:#4CAF50;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">认识</button>'+
+      '<button onclick="event.stopPropagation();reviewCard(\''+kn.replace(/'/g,"\\'")+'\',0)" style="padding:4px 10px;background:#f44336;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">不认识</button>'+
+      '<button onclick="event.stopPropagation();reviewCard(\''+kn.replace(/'/g,"\\'")+'\',1)" style="padding:4px 10px;background:#FF9800;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">模糊</button>'+
+      '<button onclick="event.stopPropagation();reviewCard(\''+kn.replace(/'/g,"\\'")+'\',3)" style="padding:4px 10px;background:#4CAF50;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">认识</button>'+
       '<button onclick="event.stopPropagation();aiCardExplain(\''+kn.replace(/'/g,"\\'")+'\')" style="padding:4px 10px;background:#059669;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">🎓 AI讲解</button></div>';
     cardsHtml+='<div class="pcard" style="cursor:pointer;min-height:140px" onclick="var b=this.querySelector(\'.cback\');b.style.display=b.style.display===\'none\'?\'block\':\'none\';var f=this.querySelector(\'.cfront\');f.style.display=f.style.display===\'none\'?\'block\':\'none\'">'
       +'<div class="cfront" style="padding:16px;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;min-height:100px">'+front+'</div>'
