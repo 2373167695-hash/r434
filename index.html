@@ -388,6 +388,8 @@ function restoreChat() {
 function buildNav() {
   // ===== Knowledge Tree (PDF chapter structure) =====
   var knh = '<div class="ni lv0 active" data-p="kn:home">📖 知识点总览</div>';
+  knh += '<div class="ni lv0" data-p="allquestions">📝 全部真题</div>';
+  knh += '<div class="ni lv0" data-p="wrongbook">📋 错题本</div>';
   knh += '<div class="ni lv0" data-p="answerbank">📝 答题语料库</div>';
   knh += '<div class="ni lv0" data-p="mock">📋 模拟试卷</div>';
   knh += '<div class="ni lv0" data-p="stats">📊 学习统计</div>';
@@ -449,6 +451,8 @@ function navigate(p, topicName) {
   else if (p === 'cards') { showCards(); }
   else if (p === 'graph') { showGraph(); }
   else if (p === 'aichat') { openAIPanel(); }
+  else if (p === 'allquestions') { showAllQuestions(); }
+  else if (p === 'wrongbook') { showWrongBook(); }
   else if (p.indexOf('kn:') === 0) { showKnContent(p.substring(3), topicName || ''); }
   else if (p === 'macro') { showMacro(); }
   else if (p === 'predictions') { showPredictions(); }
@@ -1942,6 +1946,66 @@ function aiProfessorPredict(name, research, recent) {
   var ctx = (typeof buildAIContext === 'function') ? buildAIContext(name + ' ' + research.join(' ')) : '';
   var sys = '你是人大434考研辅导老师。请基于导师的研究方向推测可能的出题方向，要求：\n1.该导师研究方向与434考试的关联\n2.推测2-3个可能的出题角度\n3.每个角度的答题框架\n4.需要重点复习的知识点\n5.中文，300字内\n\n相关真题与知识库：' + ctx;
   callDSFast([{role:'system', content:sys}, {role:'user', content:'导师：'+name+'\n研究方向：'+research.join('、')+'\n最新成果：'+recent}], rid);
+}
+
+// === All Questions Page ===
+function showAllQuestions() {
+  document.getElementById('bc').innerHTML = '<span>📝 全部真题</span>';
+  var h = '<div class="hero"><h1>📝 全部真题（' + DATA.length + '道）</h1><div class="desc">2011-2023年人大434国际商务真题，支持按年份/题型/状态筛选。点击展开查看答案和AI批改。</div></div>';
+  // Filter bar
+  h += '<div class="pcard" style="margin-bottom:12px"><div class="pcard-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">';
+  h += '<select id="aqYear" onchange="filterAllQuestions()" style="padding:5px 8px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;background:#fff"><option value="">全部年份</option>';
+  var years = []; DATA.forEach(function(q){if(years.indexOf(q.year)<0)years.push(q.year);});
+  years.sort().forEach(function(y){h+='<option value="'+y+'">'+y+'年</option>';});
+  h += '</select>';
+  h += '<select id="aqType" onchange="filterAllQuestions()" style="padding:5px 8px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;background:#fff"><option value="">全部题型</option><option value="简答">简答</option><option value="论述">论述</option><option value="案例">案例</option></select>';
+  h += '<select id="aqStatus" onchange="filterAllQuestions()" style="padding:5px 8px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;background:#fff"><option value="">全部状态</option><option value="done">已掌握</option><option value="star">重点标记</option><option value="wrong">错题</option><option value="unseen">未做</option></select>';
+  h += '<input id="aqSearch" placeholder="🔍 搜索题目..." oninput="filterAllQuestions()" style="padding:5px 10px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;flex:1;min-width:120px;outline:none">';
+  h += '</div></div>';
+  h += '<div id="aqList"></div>';
+  document.getElementById('ct').innerHTML = h;
+  filterAllQuestions();
+}
+
+function filterAllQuestions() {
+  var yr = (document.getElementById('aqYear')||{}).value || '';
+  var tp = (document.getElementById('aqType')||{}).value || '';
+  var st = (document.getElementById('aqStatus')||{}).value || '';
+  var kw = ((document.getElementById('aqSearch')||{}).value || '').toLowerCase();
+  var wlog = JSON.parse(localStorage.getItem('r434_wrong')||'{}');
+  var filtered = DATA.filter(function(q){
+    if (yr && q.year != yr) return false;
+    if (tp && q.type != tp) return false;
+    if (st === 'done' && !(marks[q.id] && marks[q.id].done)) return false;
+    if (st === 'star' && !(marks[q.id] && marks[q.id].star)) return false;
+    if (st === 'wrong' && !wlog[q.id]) return false;
+    if (st === 'unseen' && (marks[q.id] && (marks[q.id].done || marks[q.id].star))) return false;
+    if (kw && q.question.toLowerCase().indexOf(kw) < 0) return false;
+    return true;
+  });
+  var h = '<div style="margin-bottom:8px;font-size:12px;color:var(--ts)">共 ' + filtered.length + ' 道</div>';
+  filtered.forEach(function(q){ h += qCard(q); });
+  document.getElementById('aqList').innerHTML = h;
+}
+
+// === Wrong Answer Book ===
+function showWrongBook() {
+  document.getElementById('bc').innerHTML = '<span>📋 错题本</span>';
+  var wlog = JSON.parse(localStorage.getItem('r434_wrong')||'{}');
+  var ids = Object.keys(wlog).sort(function(a,b){return wlog[b]-wlog[a];});
+  var qs = [];
+  ids.forEach(function(id){ DATA.forEach(function(q){ if(q.id==id) qs.push(q); }); });
+  var h = '<div class="hero"><h1>📋 错题本</h1><div class="desc">测验中答错的题目自动收录，按错误次数排序。共 ' + qs.length + ' 道。</div></div>';
+  if (!qs.length) {
+    h += '<div style="padding:60px;text-align:center;color:var(--ts)"><p style="font-size:16px;margin-bottom:8px">🎉 暂无错题</p><p>去「测验模式」做几道题试试</p></div>';
+  } else {
+    qs.forEach(function(q){
+      var count = wlog[q.id] || 0;
+      h += '<div style="margin-bottom:4px;padding:4px 12px;font-size:11px;color:#f44336">错误 ' + count + ' 次</div>';
+      h += qCard(q);
+    });
+  }
+  document.getElementById('ct').innerHTML = h;
 }
 
 function showGraph() {
