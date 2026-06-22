@@ -386,6 +386,7 @@ function buildNav() {
   knh += '<div class="ni lv0" data-p="mock">📋 模拟试卷</div>';
   knh += '<div class="ni lv0" data-p="stats">📊 学习统计</div>';
   knh += '<div class="ni lv0" data-p="cards">🧠 记忆卡片</div>';
+  knh += '<div class="ni lv0" data-p="graph">🕸️ 知识图谱</div>';
   knh += '<div class="ni lv0" data-p="aichat">💬 AI助手</div>';
   knh += '<div class="sidebar-section-label">备考工具</div>';
   knh += '<div class="ni lv0" data-p="macro">📊 宏观数据</div>';
@@ -440,6 +441,7 @@ function navigate(p, topicName) {
   else if (p === 'mock') { showMockExams(); }
   else if (p === 'stats') { showStats(); }
   else if (p === 'cards') { showCards(); }
+  else if (p === 'graph') { showGraph(); }
   else if (p === 'aichat') { openAIPanel(); }
   else if (p.indexOf('kn:') === 0) { showKnContent(p.substring(3), topicName || ''); }
   else if (p === 'macro') { showMacro(); }
@@ -1835,6 +1837,132 @@ function showExamYear(year) {
   qs.sort(function(a,b) { return a.num - b.num; });
   qs.forEach(function(q) { h += qCard(q); });
   document.getElementById('ct').innerHTML = h;
+}
+
+function showGraph() {
+  document.getElementById('bc').innerHTML = '<span>🕸️ 知识图谱</span>';
+  // Build nodes from KNOWLEDGE
+  var nodes = [], nodeMap = {};
+  var modColors = {'国际贸易':'#7c3aed','国际投资与跨国公司':'#2563eb','国际金融':'#059669','新兴议题':'#ea580c'};
+  for (var k in KNOWLEDGE) {
+    var item = KNOWLEDGE[k];
+    var mod = (item.module||'').split('/')[0];
+    // Count exam frequency
+    var examCount = 0;
+    if (item.exam) {
+      var matches = item.exam.match(/\d{4}/g);
+      examCount = matches ? matches.length : 0;
+    }
+    var viewed = knowledgeViews[k] ? 1 : 0;
+    nodes.push({id:k, label:k, module:mod, color:modColors[mod]||'#888', size:15+examCount*3, examCount:examCount, viewed:viewed});
+    nodeMap[k] = nodes.length-1;
+  }
+  // Build edges: 1) Theory evolution (from related field) 2) Exam co-occurrence
+  var edges = [], edgeSet = {};
+  function addEdge(s, t, type, weight) {
+    if (!nodeMap[s] || !nodeMap[t] || s===t) return;
+    var key = s < t ? s+'|'+t : t+'|'+s;
+    if (edgeSet[key]) { edgeSet[key].weight += weight; return; }
+    edgeSet[key] = {source:s, target:t, type:type, weight:weight};
+    edges.push(edgeSet[key]);
+  }
+  // Exam co-occurrence: same question references multiple knowledge tags
+  DATA.forEach(function(q) {
+    var tags = q.knowledge || [];
+    for (var i=0;i<tags.length;i++) {
+      for (var j=i+1;j<tags.length;j++) {
+        // Find actual knowledge keys that match these tags
+        var k1=null, k2=null;
+        for (var k in KNOWLEDGE) {
+          if (k.indexOf(tags[i])>=0 || tags[i].indexOf(k)>=0) { k1 = k1 || k; }
+          if (k.indexOf(tags[j])>=0 || tags[j].indexOf(k)>=0) { k2 = k2 || k; }
+        }
+        if (k1 && k2) addEdge(k1, k2, 'coexam', 1);
+      }
+    }
+  });
+  // Theory evolution: sequential within same group in KNOWLEDGE_NAV
+  if (KNOWLEDGE_NAV && KNOWLEDGE_NAV.sections) {
+    KNOWLEDGE_NAV.sections.forEach(function(part) {
+      (part.chapters||[]).forEach(function(ch) {
+        (ch.groups||[]).forEach(function(grp) {
+          var topics = grp.topics || [];
+          for (var i=0;i<topics.length-1;i++) {
+            addEdge(topics[i].key, topics[i+1].key, 'evolution', 2);
+          }
+        });
+      });
+    });
+  }
+  // Render with D3-like force simulation (simplified SVG)
+  var w = 900, h = 600;
+  // Simple circular layout as fallback
+  var cx = w/2, cy = h/2, r = 220;
+  nodes.forEach(function(n,i) {
+    var angle = (i / nodes.length) * 2 * Math.PI;
+    n.x = cx + Math.cos(angle) * r + (Math.random()-0.5)*40;
+    n.y = cy + Math.sin(angle) * r + (Math.random()-0.5)*40;
+    n.vx = 0; n.vy = 0;
+  });
+  // Simple force simulation (10 iterations)
+  for (var iter=0; iter<80; iter++) {
+    // Repulsion between nodes
+    for (var i=0;i<nodes.length;i++) {
+      for (var j=i+1;j<nodes.length;j++) {
+        var dx = nodes[j].x - nodes[i].x, dy = nodes[j].y - nodes[i].y;
+        var dist = Math.sqrt(dx*dx+dy*dy) || 1;
+        var force = 800 / (dist*dist);
+        nodes[i].vx -= force * dx/dist; nodes[i].vy -= force * dy/dist;
+        nodes[j].vx += force * dx/dist; nodes[j].vy += force * dy/dist;
+      }
+    }
+    // Attraction along edges
+    edges.forEach(function(e) {
+      var ni = nodes[nodeMap[e.source]], nj = nodes[nodeMap[e.target]];
+      var dx = nj.x - ni.x, dy = nj.y - ni.y;
+      var dist = Math.sqrt(dx*dx+dy*dy) || 1;
+      var force = (dist - 120) * 0.02 * e.weight;
+      ni.vx += force * dx/dist; ni.vy += force * dy/dist;
+      nj.vx -= force * dx/dist; nj.vy -= force * dy/dist;
+    });
+    // Center gravity
+    nodes.forEach(function(n) {
+      n.vx += (cx - n.x) * 0.005;
+      n.vy += (cy - n.y) * 0.005;
+      n.x += n.vx * 0.5; n.y += n.vy * 0.5;
+      n.vx *= 0.85; n.vy *= 0.85;
+      // Boundary
+      n.x = Math.max(40, Math.min(w-40, n.x));
+      n.y = Math.max(40, Math.min(h-40, n.y));
+    });
+  }
+  // Build SVG
+  var h2 = '<div class="hero"><h1>🕸️ 知识图谱</h1><div class="desc">48个知识点的关联可视化。节点大小=考察频次，颜色=模块，连线=理论演进/真题共现。点击节点跳转。</div></div>';
+  h2 += '<div style="display:flex;gap:12px;margin:12px 0;flex-wrap:wrap;font-size:12px">';
+  h2 += '<span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#7c3aed;vertical-align:middle"></span> 国际贸易</span>';
+  h2 += '<span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#2563eb;vertical-align:middle"></span> 国际投资</span>';
+  h2 += '<span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#059669;vertical-align:middle"></span> 国际金融</span>';
+  h2 += '<span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ea580c;vertical-align:middle"></span> 新兴议题</span>';
+  h2 += '<span style="color:var(--ts)">连线粗细=关联强度</span></div>';
+  h2 += '<div style="overflow-x:auto"><svg width="'+w+'" height="'+h+'" style="background:#fafaf7;border-radius:12px;border:1px solid var(--bdr);max-width:100%">';
+  // Edges
+  edges.forEach(function(e) {
+    var ni = nodes[nodeMap[e.source]], nj = nodes[nodeMap[e.target]];
+    var ec = e.type==='evolution' ? '#c4b5fd' : '#d1d5db';
+    h2 += '<line x1="'+ni.x.toFixed(0)+'" y1="'+ni.y.toFixed(0)+'" x2="'+nj.x.toFixed(0)+'" y2="'+nj.y.toFixed(0)+'" stroke="'+ec+'" stroke-width="'+Math.min(e.weight*1.5,4)+'" opacity="0.5"/>';
+  });
+  // Nodes
+  nodes.forEach(function(n) {
+    var ring = n.viewed ? '#4CAF50' : 'none';
+    h2 += '<g style="cursor:pointer" onclick="navigateByKnowledge(\''+n.id.replace(/'/g,"\\'")+'\')">';
+    if (ring !== 'none') h2 += '<circle cx="'+n.x.toFixed(0)+'" cy="'+n.y.toFixed(0)+'" r="'+(n.size+3)+'" fill="none" stroke="'+ring+'" stroke-width="2" opacity="0.6"/>';
+    h2 += '<circle cx="'+n.x.toFixed(0)+'" cy="'+n.y.toFixed(0)+'" r="'+n.size+'" fill="'+n.color+'" opacity="0.85"><title>'+n.label+' ('+n.examCount+'次考察)</title></circle>';
+    h2 += '<text x="'+n.x.toFixed(0)+'" y="'+(n.y+n.size+12).toFixed(0)+'" text-anchor="middle" font-size="9" fill="#555" style="pointer-events:none">'+n.label.substring(0,6)+'</text>';
+    h2 += '</g>';
+  });
+  h2 += '</svg></div>';
+  h2 += '<div style="margin-top:12px;font-size:12px;color:var(--ts)">共 '+nodes.length+' 个知识点，'+edges.length+' 条关联。绿色环=已浏览。</div>';
+  document.getElementById('ct').innerHTML = h2;
 }
 
 function showCards() {
