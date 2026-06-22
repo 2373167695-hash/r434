@@ -522,7 +522,7 @@ function showHome() {
   var d = DATA.filter(function(q) { return marks[q.id] && marks[q.id].done; }).length;
   var h = '<div class="hero"><h1>📖 人大434国际商务 · 备考系统</h1>' +
     '<div class="desc">基于2011-2023年13年真题 + 两院最新学术动态，构建"学术预测→知识点→真题"三位一体的备考体系。</div>' +
-    '<div class="sts"><div class="st">📝 <strong>' + n + '</strong>道真题</div>' +
+    '<div class="sts"><div class="st">📝 <strong>' + n + '</strong>道真题 <span style="font-size:10px;color:#999">(v20260622-2)</span></div>' +
     '<div class="st">📚 <strong>' + kn + '</strong>个知识模块</div>' +
     '<div class="st">👨‍🏫 <strong>' + pn + '</strong>位重点导师</div>' +
     '<div class="st">🎯 <strong>' + prn + '</strong>个预测方向</div>' +
@@ -1615,7 +1615,7 @@ function qCard(q) {
     '<div class="qa2">' +
     '<button class="' + (m.star ? "star" : "") + '" onclick="event.stopPropagation();toggleM(\'' + q.id + '\',\'star\')">⭐</button>' +
     '<button class="' + (m.done ? "done" : "") + '" onclick="event.stopPropagation();toggleM(\'' + q.id + '\',\'done\')">✅</button>' +
-    '</div></div><div class="qb"><div class="qa">' + (q.answer || '<em style="color:#999">暂无答案</em>') + '</div>' +
+    '</div></div><div class="qb open" style="display:block"><div class="qa">' + (q.answer || '<em style="color:#999">暂无答案</em>') + '</div>' +
     (q.knowledge && q.knowledge.length ? '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">' + q.knowledge.map(function(k){return '<span class="rt" style="cursor:pointer;font-size:11px" onclick="event.stopPropagation();navigateByKnowledge(\''+k.replace(/'/g,"\\'")+'\')">'+k+'</span>';}).join('') + '</div>' : '') +
     '<div style="margin-top:12px"><div class="kn-accordion"><div class="kn-acc-hdr" onclick="this.parentElement.classList.toggle(\'open\')"><span class="kn-acc-arrow">▸</span> 🤖 AI批改这道题</div>' +
     '<div class="kn-acc-body" id="grade-' + qid + '"><textarea id="ta-' + qid + '" placeholder="在此输入你的作答..." style="width:100%;min-height:60px;border:1px solid #d0cdc6;border-radius:8px;padding:10px;font-size:13px;resize:vertical;font-family:inherit"></textarea>' +
@@ -2031,7 +2031,8 @@ function aiProfessorPredict(name, research, recent) {
 // === All Questions Page ===
 function showAllQuestions() {
   document.getElementById('bc').innerHTML = '<span>📝 全部真题</span>';
-  var h = '<div class="hero"><h1>📝 全部真题（' + DATA.length + '道）</h1><div class="desc">2011-2023年人大434国际商务真题，支持按年份/题型/状态筛选。点击展开查看答案和AI批改。</div></div>';
+  var ansCount = DATA.filter(function(q){return q.answer && q.answer.length > 5;}).length;
+  var h = '<div class="hero"><h1>📝 全部真题（' + DATA.length + '道，' + ansCount + '道有答案）</h1><div class="desc">2011-2023年人大434国际商务真题。答案默认展开显示。点击题目折叠/展开。v20260622-2</div></div>';
   // Filter bar
   h += '<div class="pcard" style="margin-bottom:12px"><div class="pcard-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">';
   h += '<select id="aqYear" onchange="filterAllQuestions()" style="padding:5px 8px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;background:#fff"><option value="">全部年份</option>';
