@@ -1716,22 +1716,27 @@ function startQuiz() {
       ids.forEach(function(id) { DATA.forEach(function(q) { if (q.id == id) pool.push(q); }); });
     }
   }
-  // Adaptive scoring: prioritize questions from unviewed/undone knowledge
-  pool = pool.slice().sort(function(a, b) {
-    var scoreA = 0, scoreB = 0;
-    var ka = a.knowledge || [], kb = b.knowledge || [];
-    // Prefer questions with unviewed knowledge
-    ka.forEach(function(k) { if (!knowledgeViews[k]) scoreA += 3; });
-    kb.forEach(function(k) { if (!knowledgeViews[k]) scoreB += 3; });
-    // Penalize already-done questions
-    if (marks[a.id] && marks[a.id].done) scoreA -= 5;
-    if (marks[b.id] && marks[b.id].done) scoreB -= 5;
-    // Random factor
-    scoreA += Math.random() * 2;
-    scoreB += Math.random() * 2;
-    return scoreB - scoreA;
+  // Shuffle with Fisher-Yates, then apply mild weighting
+  pool = pool.slice();
+  for (var i = pool.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+  }
+  // Lightly boost unviewed questions (but don't dominate)
+  pool.sort(function(a, b) {
+    var sa = 0, sb = 0;
+    (a.knowledge||[]).forEach(function(k) { if (!knowledgeViews[k]) sa += 1; });
+    (b.knowledge||[]).forEach(function(k) { if (!knowledgeViews[k]) sb += 1; });
+    if (marks[a.id] && marks[a.id].done) sa -= 2;
+    if (marks[b.id] && marks[b.id].done) sb -= 2;
+    return sb - sa;
   });
-  quizQs = pool.slice(0, Math.min(15, pool.length));
+  quizQs = pool.slice(0, Math.min(20, pool.length));
+  // Shuffle the final selection again
+  for (var i = quizQs.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = quizQs[i]; quizQs[i] = quizQs[j]; quizQs[j] = tmp;
+  }
   quizIdx = 0;
   renderQuiz();
 }
