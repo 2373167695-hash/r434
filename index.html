@@ -349,7 +349,7 @@ window.addEventListener('unhandledrejection', function(e) {
 </div>
 <script>
 // ===== DATA LOADING =====
-var DATA, SIDEBAR, TQM, KNOWLEDGE, PROFESSORS, PREDICTIONS, MACRO_DAILY, MACRO_DATA, KNOWLEDGE_NAV, MOCK_EXAMS;
+var SIDEBAR, TQM, KNOWLEDGE, PROFESSORS, PREDICTIONS, MACRO_DAILY, MACRO_DATA, KNOWLEDGE_NAV, MOCK_EXAMS; // DATA, ANSWER_BANK already inlined
 
 function loadJSON(url) {
   return new Promise(function(resolve, reject) {
@@ -380,7 +380,7 @@ Promise.all([
   loadJSON('data/answerbank.json'),
   loadJSON('data/mock_exams.json'),
 ]).then(function(results) {
-  DATA = results[0];
+  // DATA = results[0]; // already inlined, skip
   SIDEBAR = results[1];
   TQM = results[2];
   KNOWLEDGE = results[3];
