@@ -1436,20 +1436,20 @@ function showTopic(path, defaultTab) {
       h += '</ul></div>';
     }
     if (kn.content && kn.content.length) {
-      h += '<div class="kn-section"><h4>📝 理论内容</h4><ul>';
+      h += '<div class="kn-accordion open"><div class="kn-acc-hdr" onclick="this.parentElement.classList.toggle(\'open\')"><span class="kn-acc-arrow">▸</span> 📝 理论内容</div><div class="kn-acc-body"><ul>';
       kn.content.forEach(function(c) { h += '<li>' + c + '</li>'; });
-      h += '</ul></div>';
+      h += '</ul></div></div>';
     }
     if (kn.assumptions && kn.assumptions.length) {
-      h += '<div class="kn-section"><h4>🔬 核心假设</h4><ul>';
+      h += '<div class="kn-accordion"><div class="kn-acc-hdr" onclick="this.parentElement.classList.toggle(\'open\')"><span class="kn-acc-arrow">▸</span> 🔬 核心假设（'+kn.assumptions.length+'条）</div><div class="kn-acc-body"><ul>';
       kn.assumptions.forEach(function(a) { h += '<li>' + a + '</li>'; });
-      h += '</ul></div>';
+      h += '</ul></div></div>';
     }
     if (kn.formula) {
-      h += '<div class="kn-formula-box">📐 <strong>公式/模型：</strong><br>' + kn.formula + '</div>';
+      h += '<div class="kn-accordion"><div class="kn-acc-hdr" onclick="this.parentElement.classList.toggle(\'open\')"><span class="kn-acc-arrow">▸</span> 📐 公式/模型</div><div class="kn-acc-body"><div class="kn-formula-box" style="margin:0">' + kn.formula + '</div></div></div>';
     }
     if (kn.evaluation_pros || kn.evaluation_cons) {
-      h += '<div class="kn-eval-grid">';
+      h += '<div class="kn-accordion"><div class="kn-acc-hdr" onclick="this.parentElement.classList.toggle(\'open\')"><span class="kn-acc-arrow">▸</span> ⚖️ 理论评价</div><div class="kn-acc-body"><div class="kn-eval-grid">';
       if (kn.evaluation_pros) {
         h += '<div class="kn-eval-pros"><h5>✅ 优点</h5><ul>' +
           kn.evaluation_pros.map(function(pv) { return '<li>' + pv + '</li>'; }).join('') + '</ul></div>';
@@ -1458,13 +1458,11 @@ function showTopic(path, defaultTab) {
         h += '<div class="kn-eval-cons"><h5>⚠️ 局限</h5><ul>' +
           kn.evaluation_cons.map(function(cv) { return '<li>' + cv + '</li>'; }).join('') + '</ul></div>';
       }
-      h += '</div>';
+      h += '</div></div></div>';
     }
     if (kn.exam) {
-      if (kn.exam) {
-        var examHtml = kn.exam.replace(/(\d{4})年?/g, '<span style="cursor:pointer;color:var(--pu);text-decoration:underline" onclick="event.stopPropagation();showExamYear($1)">$1年</span>');
-        h += '<div class="kn-exam-link"><strong>📝 历年考察：</strong>' + examHtml + '</div>';
-      }
+      var examHtml = kn.exam.replace(/(\d{4})年?/g, '<span style="cursor:pointer;color:var(--pu);text-decoration:underline" onclick="event.stopPropagation();showExamYear($1)">$1年</span>');
+      h += '<div class="kn-accordion"><div class="kn-acc-hdr" onclick="this.parentElement.classList.toggle(\'open\')"><span class="kn-acc-arrow">▸</span> 📝 历年考察</div><div class="kn-acc-body"><div class="kn-exam-link">' + examHtml + '</div></div></div>';
     }
     h += '</div>';
   } else {
@@ -1483,6 +1481,34 @@ function showTopic(path, defaultTab) {
     h += '<div class="rel"><span style="font-size:12px;color:var(--ts)">同板块知识点：</span>';
     related.forEach(function(r) { h += '<span class="rt" onclick="navigate(\'' + r.path + '\')">' + r.name + '</span>'; });
     h += '</div>';
+  }
+  // Linear navigation based on KNOWLEDGE_NAV
+  if (KNOWLEDGE_NAV && KNOWLEDGE_NAV.sections) {
+    var flatTopics = [];
+    KNOWLEDGE_NAV.sections.forEach(function(part) {
+      (part.chapters||[]).forEach(function(ch) {
+        (ch.groups||[]).forEach(function(grp) {
+          (grp.topics||[]).forEach(function(tp) { flatTopics.push(tp); });
+        });
+      });
+    });
+    var curIdx = -1;
+    for (var ti = 0; ti < flatTopics.length; ti++) {
+      if (flatTopics[ti].key === key || flatTopics[ti].name === topicName) { curIdx = ti; break; }
+    }
+    if (curIdx >= 0) {
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:12px 16px;background:#fafaf7;border-radius:10px">';
+      if (curIdx > 0) {
+        var prev = flatTopics[curIdx-1];
+        h += '<button onclick="navigate(\'kn:'+prev.key+'\',\''+prev.name.replace(/'/g,"\\'")+'\')" style="background:none;border:none;cursor:pointer;color:var(--pu);font-size:13px;text-align:left;flex:1">← '+prev.name+'</button>';
+      } else { h += '<span style="flex:1"></span>'; }
+      h += '<span style="font-size:11px;color:var(--ts);padding:0 8px">'+(curIdx+1)+'/'+flatTopics.length+'</span>';
+      if (curIdx < flatTopics.length-1) {
+        var next = flatTopics[curIdx+1];
+        h += '<button onclick="navigate(\'kn:'+next.key+'\',\''+next.name.replace(/'/g,"\\'")+'\')" style="background:none;border:none;cursor:pointer;color:var(--pu);font-size:13px;text-align:right;flex:1">'+next.name+' →</button>';
+      } else { h += '<span style="flex:1"></span>'; }
+      h += '</div>';
+    }
   }
   h += '</div>'; // close knContent tab
   
