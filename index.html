@@ -475,8 +475,8 @@ var EXAM_PATTERN = {"total_questions":124,"year_range":"2011-2023","type_distrib
 var macroCount = MACRO_DATA && MACRO_DATA.dashboard ? MACRO_DATA.dashboard.indicators.length : 0;
 document.getElementById("sidebarInfo").textContent = "2011-2023 · " + DATA.length + "题 · " + macroCount + "项指标";
 
-var DS_URL = "https://api.xiaomimimo.com/v1/chat/completions";
-function getAPIKey(){return "sk-chns1a5ojdfxi52s706a8emohcqdmsa6vpquutjiaxwjmjhm";}
+var DS_URL = "https://api.deepseek.com/v1/chat/completions";
+function getAPIKey(){return "sk-8db8fb18bbfa446baad2410fe71814f4";}
 var _tfidf={docs:[],df:{},totalDocs:0};
 function tokenize(s){return s.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]/g," ").split(/\s+/).filter(function(t){return t.length>1||/[\u4e00-\u9fa5]/.test(t);});}
 function buildTfidf(){_tfidf.docs=[];_tfidf.df={};_tfidf.totalDocs=0;var all=[];DATA.forEach(function(q){all.push({type:"question",id:q.id,text:q.question+" "+(q.answer||"").substring(0,300)+" "+(q.knowledge||[]).join(" "),ref:q});});for(var k in KNOWLEDGE){var kn=KNOWLEDGE[k];all.push({type:"knowledge",id:k,text:k+" "+(kn.overview||"")+" "+(kn.key||[]).join(" ")+" "+(kn.exam||""),ref:kn});}if(ANSWER_BANK&&ANSWER_BANK.categories)ANSWER_BANK.categories.forEach(function(c){c.items.forEach(function(it){all.push({type:"answerbank",id:it.name,text:it.name+" "+(it.content||""),ref:it});});});all.forEach(function(d){var tokens=tokenize(d.text);var tf={};tokens.forEach(function(t){tf[t]=(tf[t]||0)+1;});d.tf=tf;d.tokens=tokens;for(var t in tf){_tfidf.df[t]=(_tfidf.df[t]||0)+1;}});_tfidf.docs=all;_tfidf.totalDocs=all.length;}
@@ -602,8 +602,8 @@ var knowledgeViews = {};
 try { knowledgeViews = JSON.parse(localStorage.getItem("r434_kv") || "{}"); } catch(e) {}
 var curPath = localStorage.getItem("r434_path") || "", quizIdx = 0, quizQs = [], quizTimer = null, quizSeconds = 0, quizWrong = [];
 
-var DS_URL = "https://api.xiaomimimo.com/v1/chat/completions";
-function getAPIKey(){return "sk-chns1a5ojdfxi52s706a8emohcqdmsa6vpquutjiaxwjmjhm";}
+var DS_URL = "https://api.deepseek.com/v1/chat/completions";
+function getAPIKey(){return "sk-8db8fb18bbfa446baad2410fe71814f4";}
 var chatHistory = [];
 try { chatHistory = JSON.parse(localStorage.getItem("r434_chat") || "[]"); } catch(e) {}
 function saveState() {
@@ -1896,10 +1896,10 @@ function aiGradeQuestion(qid, qid2) {
   sys += '\n\n【RAG检索：相关真题范例与语料】' + ragCtx;
   sys += '\n\n【学生作答】\n' + answer;
   sys += '\n\n请按以下结构输出（用markdown）：\n## 一、评分\n总分XX/10分。各维度打分：知识点覆盖(X/4)、逻辑结构(X/3)、术语准确(X/2)、实际联系(X/1)\n\n## 二、遗漏知识点\n用表格列出：| 遗漏要点 | 应该这样写 |\n\n## 三、优化重写（85分水平）\n保留学生原有思路，但补全结构、术语和遗漏点，重写一份85分水平的答案。\n\n## 四、对照分析\n| 你的版本 | 优化版本 | 差异说明 |\n\n要求：客观、具体、可操作。';
-  fetch('https://api.xiaomimimo.com/v1/chat/completions', {
+  fetch('https://api.deepseek.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + getAPIKey(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'mimo-v2.5', messages: [{ role: 'user', content: sys }], stream: true, temperature: 0.3, max_tokens: 4096 })
+    body: JSON.stringify({ model: 'deepseek-v4-pro', messages: [{ role: 'user', content: sys }], stream: true, temperature: 0.3, max_tokens: 4096 })
   }).then(function(r) { if (!r.ok) throw Error('HTTP ' + r.status); return r.body.getReader(); })
     .then(function(rd) {
       var b = '', t = '', d = new TextDecoder();
@@ -2181,7 +2181,7 @@ function callDSFast(msg, cid) {
     styled[0] = {role: 'system', content: RUC434_STYLE + '\n' + styled[0].content};
   }
   fetch(DS_URL, {method:'POST', headers:{Authorization:'Bearer '+key, 'Content-Type':'application/json'},
-    body: JSON.stringify({model:'mimo-v2.5', messages:styled, stream:true, temperature:0.3})
+    body: JSON.stringify({model:'deepseek-v4-pro', messages:styled, stream:true, temperature:0.3})
   }).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.body.getReader();})
   .then(function(rd){var b='',t='',d=new TextDecoder();function n(){rd.read().then(function(r){
     if(r.done){el.innerHTML=renderMarkdown(t);
@@ -2505,7 +2505,7 @@ function aiFollowUp(cid) {
   var msgs = JSON.parse(el.getAttribute('data-ctx') || '[]');
   msgs.push({role: 'user', content: q});
   var key = getAPIKey();
-  fetch(DS_URL, {method:'POST', headers:{Authorization:'Bearer '+key, 'Content-Type':'application/json'}, body:JSON.stringify({model:'mimo-v2.5', messages:msgs, stream:true, temperature:0.3})}).then(function(r){
+  fetch(DS_URL, {method:'POST', headers:{Authorization:'Bearer '+key, 'Content-Type':'application/json'}, body:JSON.stringify({model:'deepseek-v4-pro', messages:msgs, stream:true, temperature:0.3})}).then(function(r){
     if(!r.ok) throw Error('HTTP '+r.status);
     return r.body.getReader();
   }).then(function(rd){
@@ -2656,7 +2656,7 @@ function importData(e) {
 setTimeout(function initChat() {
   var h = '<div id="ai-overlay" class="ai-panel-overlay" onclick="closeAIPanel()"></div>' +
     '<div id="ai-panel" class="ai-panel">' +
-      '<div class="ai-panel-hdr"><h3>🤖 AI备考助手</h3><span style="font-size:10px;color:var(--ts)">MiMo v2.5</span><button onclick="clearChatHistory()" style="font-size:11px;padding:3px 8px;border:1px solid var(--bdr);border-radius:4px;background:var(--card);cursor:pointer;color:var(--ts)">清空</button><button onclick="closeAIPanel()">✕</button></div>' +
+      '<div class="ai-panel-hdr"><h3>🤖 AI备考助手</h3><span style="font-size:10px;color:var(--ts)">DeepSeek V4-Pro</span><button onclick="clearChatHistory()" style="font-size:11px;padding:3px 8px;border:1px solid var(--bdr);border-radius:4px;background:var(--card);cursor:pointer;color:var(--ts)">清空</button><button onclick="closeAIPanel()">✕</button></div>' +
       '<div class="ai-panel-body" id="chat-body">' +
         '<div class="chat-msg assistant" style="background:#f5f3ef;padding:12px 16px;border-radius:10px;font-size:13px;line-height:1.8">你好！我是人大434备考AI助手。<br><br>基于你的备考知识库，可以帮你解答任何国际贸易、国际投资、国际金融相关问题。试试问个理论对比或热点分析？</div>' +
       '</div>' +
@@ -2722,7 +2722,7 @@ function aiExplainFollowup() {
   // Use sendChat-style streaming
   var respEl = document.getElementById('aiExplainResp');
   var ld = aiLoading('思考中'); respEl.innerHTML = ''; respEl.appendChild(ld);
-  fetch(DS_URL,{method:'POST',headers:{Authorization:'Bearer '+getAPIKey(),'Content-Type':'application/json'},body:JSON.stringify({model:'mimo-v2.5',messages:msgs,stream:true,temperature:0.3})}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.body.getReader();}).then(function(rd){var b='',t='',d=new TextDecoder();function n(){rd.read().then(function(r){if(r.done){respEl.innerHTML=renderMarkdown(t);aiExplainHistory.push({role:'assistant',content:t});return;}b+=d.decode(r.value,{stream:true});var ls=b.split('\n');b=ls.pop()||'';ls.forEach(function(l){if(l.startsWith('data: ')){var dd=l.substring(6);if(dd=='[DONE]')return;try{var p=JSON.parse(dd);if(p.choices&&p.choices[0].delta){var x=p.choices[0].delta.content||'';if(x){t+=x;respEl.innerHTML=renderMarkdown(t);}}}catch(e){}}});n();})}n();}).catch(function(err){respEl.innerHTML='<span style=color:red>请求失败：'+err.message+'</span>';});
+  fetch(DS_URL,{method:'POST',headers:{Authorization:'Bearer '+getAPIKey(),'Content-Type':'application/json'},body:JSON.stringify({model:'deepseek-v4-pro',messages:msgs,stream:true,temperature:0.3})}).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.body.getReader();}).then(function(rd){var b='',t='',d=new TextDecoder();function n(){rd.read().then(function(r){if(r.done){respEl.innerHTML=renderMarkdown(t);aiExplainHistory.push({role:'assistant',content:t});return;}b+=d.decode(r.value,{stream:true});var ls=b.split('\n');b=ls.pop()||'';ls.forEach(function(l){if(l.startsWith('data: ')){var dd=l.substring(6);if(dd=='[DONE]')return;try{var p=JSON.parse(dd);if(p.choices&&p.choices[0].delta){var x=p.choices[0].delta.content||'';if(x){t+=x;respEl.innerHTML=renderMarkdown(t);}}}catch(e){}}});n();})}n();}).catch(function(err){respEl.innerHTML='<span style=color:red>请求失败：'+err.message+'</span>';});
 }
 function getPageContext() {
   var ctx = {type:'home',label:'首页'};

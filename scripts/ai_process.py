@@ -17,12 +17,12 @@ import requests
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
-MIMO_URL = "https://api.xiaomimimo.com/v1/chat/completions"
-MIMO_MODEL = "mimo-v2.5"
+DS_URL = "https://api.deepseek.com/v1/chat/completions"
+DS_MODEL = "deepseek-v4-pro"
 
 def get_api_key():
     """获取 MiMo API Key，优先环境变量，其次从index.html提取"""
-    key = os.environ.get("MIMO_API_KEY", "")
+    key = os.environ.get("DS_API_KEY", "")
     if key:
         return key
     
@@ -40,8 +40,8 @@ def get_api_key():
 
 HEADERS = None  # Will be set when key is available
 
-def call_mimo(system_prompt, user_prompt, max_tokens=2000):
-    """调用 MiMo API"""
+def call_ai(system_prompt, user_prompt, max_tokens=2000):
+    """调用 DeepSeek API"""
     key = get_api_key()
     if not key:
         print("  [WARN] API Key 未找到，跳过 AI 加工")
@@ -56,10 +56,10 @@ def call_mimo(system_prompt, user_prompt, max_tokens=2000):
     
     try:
         resp = requests.post(
-            MIMO_URL,
+            DS_URL,
             headers=HEADERS,
             json={
-                "model": MIMO_MODEL,
+                "model": DS_MODEL,
                 "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
@@ -139,7 +139,7 @@ def process_macro_data(item, related_knowledge_keys):
 
 请生成备考解读JSON。"""
     
-    result = call_mimo(system_prompt, user_prompt, max_tokens=500)
+    result = call_ai(system_prompt, user_prompt, max_tokens=500)
     return extract_json(result)
 
 
@@ -166,7 +166,7 @@ def process_hotspot_item(item):
 
 请生成备考素材JSON。"""
     
-    result = call_mimo(system_prompt, user_prompt, max_tokens=600)
+    result = call_ai(system_prompt, user_prompt, max_tokens=600)
     return extract_json(result)
 
 
@@ -337,7 +337,7 @@ def main():
     
     print("=" * 60)
     print("AI 智能加工")
-    print(f"模型: {MIMO_MODEL}")
+    print(f"模型: {DS_MODEL}")
     print(f"运行时间: {datetime.now().isoformat()}")
     print("=" * 60)
     
