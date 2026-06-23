@@ -510,7 +510,7 @@ function buildAIContext(query) {
   var totalQ = DATA.length;
   var totalKN = Object.keys(KNOWLEDGE).length;
   
-  // === DECLARATION: always tell AI it has the data ===
+  // === DECLARATION ===
   ctx += '【重要声明】你已经拥有完整的人大434国际商务考研数据库，包括：\n';
   ctx += '· ' + totalQ + ' 道历年真题的完整题目和标准答案\n';
   ctx += '· ' + totalKN + ' 个知识点的详细讲解\n';
@@ -522,70 +522,19 @@ function buildAIContext(query) {
   var doneQ = 0, starQ = 0;
   DATA.forEach(function(q) { if (marks[q.id] && marks[q.id].done) doneQ++; if (marks[q.id] && marks[q.id].star) starQ++; });
   var viewedKN = Object.keys(knowledgeViews).length;
-  var profile = '【学习者画像】已完成真题：' + doneQ + '/' + totalQ + ' 已浏览知识点：' + viewedKN + '/' + totalKN + '\n\n';
-  ctx += profile;
+  ctx += '【学习者画像】已完成真题：' + doneQ + '/' + totalQ + ' 已浏览知识点：' + viewedKN + '/' + totalKN + '\n\n';
   
-  // === LATEST YEAR FULL PAPER (always include as baseline) ===
-  var latestYear = Math.max.apply(null, DATA.map(function(q) { return q.year || 0; }));
-  var latestQs = DATA.filter(function(q) { return q.year === latestYear && q.answer && q.answer.length > 10; });
-  if (latestQs.length > 0) {
-    ctx += '=== ' + latestYear + '年完整真题与标准答案（基准风格参考） ===\n\n';
-    latestQs.forEach(function(q) {
-      ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】\n';
-      ctx += '题目：' + q.question + '\n';
-      ctx += '标准答案：' + q.answer + '\n\n';
-    });
-  }
-  
-  // === SMART RETRIEVAL: top-15 relevant questions with FULL answers ===
-  var extraQs = [];
-  if (typeof ragRetrieve === 'function') {
-    var results = ragRetrieve(query, 20);
-    var seenIds = {};
-    // mark latest year questions as seen
-    latestQs.forEach(function(q) { seenIds[q.id] = true; });
-    
-    results.forEach(function(r) {
-      if (r.type === 'question' && !seenIds[r.ref.id]) {
-        seenIds[r.ref.id] = true;
-        extraQs.push(r.ref);
-      } else if (r.type === 'knowledge') {
-        extraQs.push(r); // keep knowledge results
-      }
-    });
-    
-    // Add relevant questions (not already in baseline)
-    var addQs = extraQs.filter(function(item) { return item.type !== undefined; }); // only questions
-    var ragQuestions = extraQs.filter(function(item) { return item.year; }); // questions have year
-    var ragKnowledge = extraQs.filter(function(item) { return !item.year && item.module; }); // knowledge has module
-    
-    if (ragQuestions.length > 0) {
-      ctx += '=== 与当前问题最相关的真题（补充参考） ===\n\n';
-      ragQuestions.slice(0, 15).forEach(function(q) {
-        if (q.answer && q.answer.length > 10) {
-          ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】\n';
-          ctx += '题目：' + q.question + '\n';
-          ctx += '标准答案：' + q.answer + '\n\n';
-        }
-      });
-    }
-    
-    if (ragKnowledge.length > 0) {
-      ctx += '=== 相关知识点 ===\n\n';
-      ragKnowledge.slice(0, 8).forEach(function(k) {
-        ctx += '【' + k.id + '】';
-        if (k.module) ctx += ' 模块：' + k.module;
-        ctx += '\n';
-        if (k.overview) ctx += '概述：' + k.overview + '\n';
-        if (k.key && k.key.length) ctx += '要点：' + k.key.join('；') + '\n';
-        if (k.exam) ctx += '历年考察：' + k.exam + '\n';
-        ctx += '\n';
-      });
-    }
-  } else {
-    // Fallback: no RAG, include all questions with answers
-    ctx += '=== 全部真题与标准答案（' + totalQ + '道） ===\n\n';
-    DATA.forEach(function(q) {
+  // === ALL EXAM QUESTIONS WITH FULL ANSWERS ===
+  ctx += '=== 全部真题与标准答案（' + totalQ + '道，100%完整，无截断） ===\n\n';
+  var yearGroups = {};
+  DATA.forEach(function(q) {
+    var y = q.year || '未知';
+    if (!yearGroups[y]) yearGroups[y] = [];
+    yearGroups[y].push(q);
+  });
+  Object.keys(yearGroups).sort().forEach(function(year) {
+    ctx += '—— ' + year + '年 ——\n';
+    yearGroups[year].forEach(function(q) {
       ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】\n';
       ctx += '题目：' + q.question + '\n';
       if (q.answer && q.answer.length > 10) {
@@ -593,6 +542,20 @@ function buildAIContext(query) {
       }
       ctx += '\n';
     });
+  });
+  
+  // === ALL KNOWLEDGE POINTS ===
+  ctx += '=== 全部知识点（' + totalKN + '个） ===\n\n';
+  for (var k in KNOWLEDGE) {
+    var kn = KNOWLEDGE[k];
+    ctx += '【' + k + '】';
+    if (kn.module) ctx += ' 模块：' + kn.module;
+    ctx += '\n';
+    if (kn.overview) ctx += '概述：' + kn.overview + '\n';
+    if (kn.key && kn.key.length) ctx += '要点：' + kn.key.join('；') + '\n';
+    if (kn.formula) ctx += '公式：' + kn.formula + '\n';
+    if (kn.exam) ctx += '历年考察：' + kn.exam + '\n';
+    ctx += '\n';
   }
   
   // === HOT TOPICS ===
