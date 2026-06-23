@@ -546,7 +546,7 @@ function buildAIContext(query) {
         if (!q.answer || q.answer.length < 5) return; // skip questions without answers
         ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】\n';
         ctx += '题目：' + q.question + '\n';
-        ctx += '标准答案：' + q.answer.substring(0, 600) + '\n'; // limit answer length per question
+        ctx += '标准答案：' + q.answer + '\n';
         ctx += '\n';
         shown++;
       });
