@@ -9,8 +9,9 @@ on:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 15       # 15分钟超时保护
     permissions:
-      contents: write          # 允许 git push
+      contents: write
 
     steps:
       - name: 检出代码
@@ -28,20 +29,24 @@ jobs:
 
       - name: 安装 Python 依赖
         run: pip install akshare requests beautifulsoup4
+        timeout-minutes: 5
 
       - name: 采集宏观数据
         run: python scripts/fetch_macro.py
+        timeout-minutes: 5
 
       - name: 采集热点数据
         run: python scripts/fetch_hotspots.py
         continue-on-error: true
+        timeout-minutes: 5
 
       - name: AI 智能加工
         env:
           MIMO_API_KEY: ${{ secrets.MIMO_API_KEY }}
         run: python scripts/ai_process.py
+        timeout-minutes: 5
 
-      - name: 重新构建 HTML
+      - name: 重新构建 HTML（含数据校验）
         run: node scripts/rebuild.js
 
       - name: 提交变更并推送
@@ -50,9 +55,9 @@ jobs:
           git config user.email "bot@r434.pages.dev"
           git add data/ index.html
           if git diff --staged --quiet; then
-            echo "没有数据变更，跳过提交"
+            echo "没有有效数据变更，跳过提交"
           else
             git commit -m "auto: 更新热点与宏观数据 [$(date +%Y-%m-%d)]"
             git push
-            echo "已提交并推送最新数据"
+            echo "已提交并推送"
           fi
