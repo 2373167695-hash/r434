@@ -507,64 +507,72 @@ var RUC434_STYLE = '【人大434写作风格——必须严格遵循】\n' +
 
 function buildAIContext(query) {
   var ctx = '';
+  var totalQ = DATA.length;
+  var totalKN = Object.keys(KNOWLEDGE).length;
+  
+  // === DECLARATION: always tell AI it has the data ===
+  ctx += '【重要声明】你已经拥有完整的人大434国际商务考研数据库，包括：\n';
+  ctx += '· ' + totalQ + ' 道历年真题的完整题目和标准答案\n';
+  ctx += '· ' + totalKN + ' 个知识点的详细讲解\n';
+  ctx += '· 历年命题规律和答题规范\n';
+  ctx += '· 学术热点素材和导师研究方向\n';
+  ctx += '当用户问你是否拥有数据时，必须回答"是"并举例说明。\n\n';
   
   // === LEARNING PROFILE ===
-  var doneQ = 0, starQ = 0, totalQ = DATA.length;
+  var doneQ = 0, starQ = 0;
   DATA.forEach(function(q) { if (marks[q.id] && marks[q.id].done) doneQ++; if (marks[q.id] && marks[q.id].star) starQ++; });
-  var viewedKN = Object.keys(knowledgeViews).length, totalKN = Object.keys(KNOWLEDGE).length;
-  var modScores = {};
-  for (var k in KNOWLEDGE) {
-    var m = KNOWLEDGE[k].module || '';
-    if (m) {
-      if (!modScores[m]) modScores[m] = { total: 0, viewed: 0 };
-      modScores[m].total++;
-      if (knowledgeViews[k]) modScores[m].viewed++;
-    }
-  }
-  var profile = '【学习者画像】已完成真题：' + doneQ + '/' + totalQ + ' 已浏览知识点：' + viewedKN + '/' + totalKN + ' ';
-  for (var mod in modScores) {
-    profile += mod + ':' + modScores[mod].viewed + '/' + modScores[mod].total + ' ';
-  }
-  profile += '\n\n';
+  var viewedKN = Object.keys(knowledgeViews).length;
+  var profile = '【学习者画像】已完成真题：' + doneQ + '/' + totalQ + ' 已浏览知识点：' + viewedKN + '/' + totalKN + '\n\n';
   ctx += profile;
   
+  // === LATEST YEAR FULL PAPER (always include as baseline) ===
+  var latestYear = Math.max.apply(null, DATA.map(function(q) { return q.year || 0; }));
+  var latestQs = DATA.filter(function(q) { return q.year === latestYear && q.answer && q.answer.length > 10; });
+  if (latestQs.length > 0) {
+    ctx += '=== ' + latestYear + '年完整真题与标准答案（基准风格参考） ===\n\n';
+    latestQs.forEach(function(q) {
+      ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】\n';
+      ctx += '题目：' + q.question + '\n';
+      ctx += '标准答案：' + q.answer + '\n\n';
+    });
+  }
+  
   // === SMART RETRIEVAL: top-15 relevant questions with FULL answers ===
+  var extraQs = [];
   if (typeof ragRetrieve === 'function') {
     var results = ragRetrieve(query, 20);
-    var relevantQs = [], relevantKs = [];
+    var seenIds = {};
+    // mark latest year questions as seen
+    latestQs.forEach(function(q) { seenIds[q.id] = true; });
+    
     results.forEach(function(r) {
-      if (r.type === 'question') relevantQs.push(r.ref);
-      else if (r.type === 'knowledge') relevantKs.push(r.ref);
+      if (r.type === 'question' && !seenIds[r.ref.id]) {
+        seenIds[r.ref.id] = true;
+        extraQs.push(r.ref);
+      } else if (r.type === 'knowledge') {
+        extraQs.push(r); // keep knowledge results
+      }
     });
     
-    // Inject top 15 most relevant questions WITH their full answers
-    if (relevantQs.length > 0) {
-      ctx += '=== 最相关真题与标准答案（共' + Math.min(15, relevantQs.length) + '道，请参考其风格作答） ===\n\n';
-      var shown = 0;
-      relevantQs.forEach(function(q) {
-        if (shown >= 15) return;
-        if (!q.answer || q.answer.length < 5) return; // skip questions without answers
-        ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】\n';
-        ctx += '题目：' + q.question + '\n';
-        ctx += '标准答案：' + q.answer + '\n';
-        ctx += '\n';
-        shown++;
-      });
-      if (shown === 0) {
-        // fallback: include questions even without answers
-        relevantQs.slice(0, 8).forEach(function(q) {
+    // Add relevant questions (not already in baseline)
+    var addQs = extraQs.filter(function(item) { return item.type !== undefined; }); // only questions
+    var ragQuestions = extraQs.filter(function(item) { return item.year; }); // questions have year
+    var ragKnowledge = extraQs.filter(function(item) { return !item.year && item.module; }); // knowledge has module
+    
+    if (ragQuestions.length > 0) {
+      ctx += '=== 与当前问题最相关的真题（补充参考） ===\n\n';
+      ragQuestions.slice(0, 15).forEach(function(q) {
+        if (q.answer && q.answer.length > 10) {
           ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】\n';
-          ctx += '题目：' + q.question + '\n\n';
-        });
-      }
+          ctx += '题目：' + q.question + '\n';
+          ctx += '标准答案：' + q.answer + '\n\n';
+        }
+      });
     }
     
-    // Inject top 8 most relevant knowledge points
-    if (relevantKs.length > 0) {
-      ctx += '=== 相关知识点（' + Math.min(8, relevantKs.length) + '个） ===\n\n';
-      var shownK = 0;
-      relevantKs.forEach(function(k) {
-        if (shownK >= 8) return;
+    if (ragKnowledge.length > 0) {
+      ctx += '=== 相关知识点 ===\n\n';
+      ragKnowledge.slice(0, 8).forEach(function(k) {
         ctx += '【' + k.id + '】';
         if (k.module) ctx += ' 模块：' + k.module;
         ctx += '\n';
@@ -572,9 +580,19 @@ function buildAIContext(query) {
         if (k.key && k.key.length) ctx += '要点：' + k.key.join('；') + '\n';
         if (k.exam) ctx += '历年考察：' + k.exam + '\n';
         ctx += '\n';
-        shownK++;
       });
     }
+  } else {
+    // Fallback: no RAG, include all questions with answers
+    ctx += '=== 全部真题与标准答案（' + totalQ + '道） ===\n\n';
+    DATA.forEach(function(q) {
+      ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】\n';
+      ctx += '题目：' + q.question + '\n';
+      if (q.answer && q.answer.length > 10) {
+        ctx += '标准答案：' + q.answer + '\n';
+      }
+      ctx += '\n';
+    });
   }
   
   // === HOT TOPICS ===
@@ -612,7 +630,7 @@ function callDS(msg,cid){var el=document.getElementById(cid);if(!el)return;var k
 function aiDiagnose(){var div=document.getElementById("aiDiagnosis"),content=document.getElementById("aiDiagnosisContent");div.style.display="block";content.innerHTML="AI正在分析...";var s="浏览知识点"+Object.keys(knowledgeViews).length+"个，已做真题"+Object.values(marks).filter(function(v){return v.done}).length+"道。";callDS([{role:"system",content:"你是考研备考规划专家，擅长分析学习数据。请用中文回复。"},{role:"user",content:"学习数据："+s+"请做学习诊断，500字内，包括进度评价、薄弱模块、优先复习建议、冲刺建议。"}],"aiDiagnosisContent");}
 function aiGenerateQuestion(knowledge){var div=document.getElementById("aiQuestions"),content=document.getElementById("aiQuestionsContent");div.style.display="block";content.innerHTML="生成中...";var ctx=buildAIContext(knowledge);var sys=RUC434_STYLE+"\n你是中国人民大学434国际商务专业考研命题老师。请严格遵循以上写作风格，参考以下真题范例出题。\n\n【命题要求】\n1.题目风格必须100%贴合人大434真题的命题套路\n2.简答题10-15分,论述题20-25分,计算/案例15-20分\n3.必须结合中国经济现实或国际商务案例\n4.参考答案必须按人大434评分标准（知识点覆盖4分+逻辑结构3分+术语准确2分+实际联系1分）\n"+ctx;callDS([{role:"system",content:sys},{role:"user",content:"请为知识点["+knowledge+"]生成3道模拟题(1简答+1论述+1计算/案例),每题附参考答案要点。用【第1题】【第2题】【第3题】编号。"}],"aiQuestionsContent");}
 
-function sendChat(){var inp=document.getElementById("chat-q"),q=inp.value.trim();if(!q)return;inp.value="";var body=document.getElementById("chat-body");body.innerHTML+='<div class="chat-msg user">'+q+'</div>';var ld=document.createElement("div");ld.className="chat-msg assistant";ld.id="c-load";ld.innerHTML='<span class="chat-dot"></span><span class="chat-dot"></span><span class="chat-dot"></span>';body.appendChild(ld);body.scrollTop=body.scrollHeight;chatHistory.push({role:"user",content:q});var md=document.createElement("div");md.className="chat-msg assistant";md.id="c-resp";md.style.display="none";body.appendChild(md);var ctx=buildAIContext(q);var sys=RUC434_STYLE+"\n你是人大434国际商务考研AI助手。请严格遵循以上写作风格，参考以下真题答案、知识点和热点素材回答问题。公式请用$...$包裹。\n"+ctx+"\n\n要求：贴合人大434风格、结构化、分点作答、术语中英文对照、结尾有考点提示。";var msgs=[{role:"system",content:sys}];chatHistory.slice(-10).forEach(function(h){msgs.push({role:h.role,content:h.content});});fetch(DS_URL,{method:"POST",headers:{Authorization:"Bearer "+getAPIKey(),"Content-Type":"application/json"},body:JSON.stringify({model:"mimo-v2.5",messages:msgs,stream:true,temperature:0.3})}).then(function(r){if(!r.ok)throw Error("HTTP "+r.status);return r.body.getReader();}).then(function(rd){var b="",t="",d=new TextDecoder(),firstChunk=true;function n(){rd.read().then(function(r){if(r.done){var lx=document.getElementById("c-load");if(lx)lx.remove();md.style.display="";md.innerHTML=renderMarkdown(t);chatHistory.push({role:"assistant",content:t});saveState();return;}b+=d.decode(r.value,{stream:true});var ls=b.split("\n");b=ls.pop()||"";ls.forEach(function(l){if(l.startsWith("data: ")){var dd=l.substring(6);if(dd=="[DONE]")return;try{var p=JSON.parse(dd);if(p.choices&&p.choices[0].delta){var x=p.choices[0].delta.content||"";if(x){if(firstChunk){firstChunk=false;var lx=document.getElementById("c-load");if(lx)lx.remove();md.style.display="";}t+=x;md.innerHTML=renderMarkdown(t);body.scrollTop=body.scrollHeight;}}}catch(e){}}});n();})}n();}).catch(function(err){var lx=document.getElementById("c-load");if(lx)lx.remove();md.style.display="";md.innerHTML="<span style=color:red>AI请求失败："+err.message+"</span>";});}
+function sendChat(){var inp=document.getElementById("chat-q"),q=inp.value.trim();if(!q)return;inp.value="";var body=document.getElementById("chat-body");body.innerHTML+='<div class="chat-msg user">'+q+'</div>';var ld=document.createElement("div");ld.className="chat-msg assistant";ld.id="c-load";ld.innerHTML='<span class="chat-dot"></span><span class="chat-dot"></span><span class="chat-dot"></span>';body.appendChild(ld);body.scrollTop=body.scrollHeight;chatHistory.push({role:"user",content:q});var md=document.createElement("div");md.className="chat-msg assistant";md.id="c-resp";md.style.display="none";body.appendChild(md);var ctx=buildAIContext(q);var sys=RUC434_STYLE+"\n你是人大434国际商务考研AI助手。你的数据库中已包含完整的历年真题和标准答案，你随时可以引用任何一道真题。请严格遵循以上写作风格，参考数据库中的真题答案、知识点和热点素材回答问题。公式请用$...$包裹。\n"+ctx+"\n\n要求：必须参考数据库中的真实真题和答案来回答；贴合人大434风格、结构化、分点作答、术语中英文对照、结尾有考点提示。";var msgs=[{role:"system",content:sys}];chatHistory.slice(-10).forEach(function(h){msgs.push({role:h.role,content:h.content});});fetch(DS_URL,{method:"POST",headers:{Authorization:"Bearer "+getAPIKey(),"Content-Type":"application/json"},body:JSON.stringify({model:"mimo-v2.5",messages:msgs,stream:true,temperature:0.3})}).then(function(r){if(!r.ok)throw Error("HTTP "+r.status);return r.body.getReader();}).then(function(rd){var b="",t="",d=new TextDecoder(),firstChunk=true;function n(){rd.read().then(function(r){if(r.done){var lx=document.getElementById("c-load");if(lx)lx.remove();md.style.display="";md.innerHTML=renderMarkdown(t);chatHistory.push({role:"assistant",content:t});saveState();return;}b+=d.decode(r.value,{stream:true});var ls=b.split("\n");b=ls.pop()||"";ls.forEach(function(l){if(l.startsWith("data: ")){var dd=l.substring(6);if(dd=="[DONE]")return;try{var p=JSON.parse(dd);if(p.choices&&p.choices[0].delta){var x=p.choices[0].delta.content||"";if(x){if(firstChunk){firstChunk=false;var lx=document.getElementById("c-load");if(lx)lx.remove();md.style.display="";}t+=x;md.innerHTML=renderMarkdown(t);body.scrollTop=body.scrollHeight;}}}catch(e){}}});n();})}n();}).catch(function(err){var lx=document.getElementById("c-load");if(lx)lx.remove();md.style.display="";md.innerHTML="<span style=color:red>AI请求失败："+err.message+"</span>";});}
 
 // ===== STATE =====
 var marks = {};
