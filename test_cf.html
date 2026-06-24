@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>AI Test</title></head><body>
+<h2>AI API Test (Cloudflare Worker)</h2>
+<button onclick="test()">点我测试</button>
+<pre id="r"></pre>
+<script>
+async function test() {
+  var r = document.getElementById('r');
+  r.textContent = '请求中...';
+  try {
+    var resp = await fetch('https://api.ruc434s.cloud', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({messages: [{role:'user',content:'回复一个字：好'}]})
+    });
+    r.textContent = 'HTTP: ' + resp.status + '\n';
+    var data = await resp.json();
+    r.textContent += 'content: ' + (data.content || '(空)') + '\n';
+    r.textContent += 'error: ' + (data.error || '(无)') + '\n';
+    r.textContent += 'Full: ' + JSON.stringify(data, null, 2);
+  } catch(e) {
+    r.textContent = 'ERROR: ' + e.message;
+  }
+}
+</script>
+</body></html>
