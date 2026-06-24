@@ -2638,73 +2638,81 @@ function showHotTopic() {
   document.getElementById('bc').innerHTML = '<span>🔥 热点素材</span>';
   
   var t = HOT_TOPICS;
-  var h = '<div class="hero"><h1>🔥 ' + t.title + '</h1><div class="desc">按专题分类整理，提供预测题目+答题框架+关联真题+案例 · 更新：' + t.updated + '</div></div>';
+  var h = '<div class="hero"><h1>🔥 ' + t.title + '</h1><div class="desc">按专题分类整理，点击进入查看详细考点分析 · 更新：' + t.updated + '</div></div>';
+  h += '<div class="dash-hero" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))">';
   
-  (t.categories || []).forEach(function(cat) {
-    h += '<div class="macro-section-header"><h3>' + cat.icon + ' ' + cat.category + '</h3><span class="badge">' + cat.cards.length + '个专题</span></div>';
-    
-    (cat.cards || []).forEach(function(issue) {
+  (t.categories || []).forEach(function(cat, i) {
+    var cardCount = (cat.cards || []).length;
+    h += '<div class="dash-metric" style="cursor:pointer;padding:20px;transition:transform .15s" onclick="showHotCategory(' + i + ')" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">';
+    h += '<div class="label" style="font-size:18px;margin-bottom:8px">' + cat.icon + ' ' + cat.category + '</div>';
+    h += '<div class="value" style="font-size:24px;font-weight:700">' + cardCount + '</div>';
+    h += '<div style="font-size:12px;color:var(--ts);margin-top:4px">个备考专题';
+    (cat.cards || []).forEach(function(c) {
+      h += '<br><span style="color:var(--t);font-size:13px">' + c.topic.substring(0,18) + (c.topic.length>18?'...':'') + '</span>';
+    });
+    h += '</div></div>';
+  });
+  
+  h += '</div>';
+  document.getElementById('ct').innerHTML = h;
+}
+
+function showHotCategory(idx) {
+  if (!HOT_TOPICS || !HOT_TOPICS.categories) return;
+  var cat = HOT_TOPICS.categories[idx];
+  if (!cat) return;
+  
+  document.getElementById('bc').innerHTML = '<span>🔥 热点素材 / ' + cat.category + '</span>';
+  var h = '<div class="hero"><h1>' + cat.icon + ' ' + cat.category + '</h1><div class="desc">共 ' + cat.cards.length + ' 个备考专题</div></div>';
+  
+  (cat.cards || []).forEach(function(issue) {
     h += '<div class="know-pred-card" style="margin-bottom:16px">';
     h += '<div class="know-pred-hdr" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">';
     h += '<div style="display:flex;align-items:center;gap:8px">';
-    h += '<span class="icon" style="background:' + (issue.probability==="★★★"?"#7c3aed":"#f59e0b") + ';color:#fff;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px">📌</span>';
+    h += '<span class="icon" style="background:#7c3aed;color:#fff;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px">📌</span>';
     h += '<h4 style="font-size:15px;font-weight:700">' + issue.topic + '</h4>';
     h += '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#ede9fe;color:#7c3aed">' + issue.exam_type + '</span>';
     h += '<span style="font-size:11px;color:#f59e0b">' + issue.probability + '</span>';
-    h += '</div>';
-    h += '<span style="font-size:11px;color:var(--ts)">' + issue.date + '</span>';
-    h += '</div>';
+    h += '</div></div>';
     
     h += '<div class="know-pred-body" style="padding:16px">';
-    
-    // News brief
     h += '<div style="background:#fefce8;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:12px;line-height:1.7;color:#92400e">📰 ' + issue.news_brief + '</div>';
-    
-    // Predicted question
     h += '<div style="background:linear-gradient(135deg,#ede9fe,#f5f3ff);padding:14px;border-radius:10px;border-left:4px solid #7c3aed;margin-bottom:12px">';
     h += '<div style="font-size:11px;color:#7c3aed;font-weight:700;margin-bottom:6px">🎯 预测题目</div>';
-    h += '<div style="font-size:14px;font-weight:600;line-height:1.7;color:#333">' + issue.predicted_question + '</div>';
-    h += '</div>';
+    h += '<div style="font-size:14px;font-weight:600;line-height:1.7;color:#333">' + issue.predicted_question + '</div></div>';
     
-    // Answer framework
     h += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:var(--t);margin-bottom:6px">📝 答题框架</div>';
-    (issue.answer_framework || []).forEach(function(af, i) {
+    (issue.answer_framework || []).forEach(function(af) {
       h += '<div style="padding:6px 0;font-size:13px;line-height:1.7;border-bottom:1px dashed #f0f0f0">' + af + '</div>';
     });
     h += '</div>';
     
-    // Key terms
     h += '<div style="margin-bottom:12px"><div style="display:flex;flex-wrap:wrap;gap:6px">';
     (issue.key_terms || []).forEach(function(kt) {
-      h += '<span style="padding:3px 10px;background:#dbeafe;color:#1e40af;border-radius:12px;font-size:11px;cursor:pointer" onclick="navigateByKnowledge(\'' + kt.replace(/'/g,"\\'") + '\')">' + kt + '</span>';
+      h += '<span style="padding:3px 10px;background:#dbeafe;color:#1e40af;border-radius:12px;font-size:11px;cursor:pointer" onclick="event.stopPropagation();navigateByKnowledge(\'' + kt.replace(/'/g,"\\'") + '\')">' + kt + '</span>';
     });
     h += '</div></div>';
     
-    // Related exam questions
     var examQs = [];
     (issue.related_exam_ids || []).forEach(function(eid) {
       DATA.forEach(function(q) { if (q.id === eid) examQs.push(q); });
     });
     if (examQs.length) {
-      h += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:var(--t);margin-bottom:6px">📜 关联真题（' + examQs.length + '道）</div>';
+      h += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:var(--t);margin-bottom:6px">📜 关联真题</div>';
       examQs.forEach(function(q) {
         h += '<div class="know-pred-ref" onclick="showExamQ(\'' + q.id + '\')" style="padding:6px 10px;margin:3px 0;background:#fafaf7;border-radius:6px;cursor:pointer;font-size:12px"><strong>' + q.year + '年#' + q.num + '</strong> ' + q.type + ' · ' + q.question.substring(0,30) + '...</div>';
       });
       h += '</div>';
     }
     
-    // Case study
     if (issue.case_study) {
       h += '<div style="background:#f0fdf4;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.7;color:#166534"><div style="font-weight:700;margin-bottom:4px">💼 案例</div>' + issue.case_study + '</div>';
     }
     
-    // AI button
     h += '<button onclick="aiHotExplain(\'' + issue.id + '\')" style="margin-top:12px;padding:8px 18px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">🧠 AI深入分析</button>';
     h += '<div id="hotAI_' + issue.id + '" style="margin-top:10px"></div>';
-    
     h += '</div></div>';
   });
-  }); // end categories
   
   document.getElementById('ct').innerHTML = h;
 }
