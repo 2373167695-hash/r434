@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>API Test</title></head><body>
+<h2>CloudBase API Test</h2>
+<button onclick="test()">点我测试</button>
+<div id="r"></div>
+<script>
+async function test() {
+  var r = document.getElementById('r');
+  r.textContent = 'Testing...';
+  try {
+    var resp = await fetch('https://ruc434-d4g5fxo6o7fde3402-1445684079.ap-shanghai.app.tcloudbase.com/proxyAI', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({messages: [{role:'user',content:'说一个字：好'}]})
+    });
+    r.textContent = 'HTTP Status: ' + resp.status;
+    var data = await resp.text();
+    r.textContent += '\nResponse: ' + data.substring(0, 500);
+  } catch(e) {
+    r.textContent = 'ERROR: ' + e.message + '\n' + e.name + '\n' + (e.cause || '');
+  }
+}
+</script>
+</body></html>
