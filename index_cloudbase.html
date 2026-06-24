@@ -458,7 +458,7 @@ var EXAM_PATTERN = {"total_questions":124,"year_range":"2011-2023","type_distrib
 var macroCount = MACRO_DATA && MACRO_DATA.dashboard ? MACRO_DATA.dashboard.indicators.length : 0;
 document.getElementById("sidebarInfo").textContent = "2011-2023 · " + DATA.length + "题 · " + macroCount + "项指标";
 
-var DS_URL = "https://ruc434-d4g5fxo6o7fde3402-1445684079.ap-shanghai.app.tcloudbase.com";
+var DS_URL = "https://ruc434-d4g5fxo6o7fde3402-1445684079.ap-shanghai.app.tcloudbase.com/proxyAI";
 function getAPIKey(){return "CLOUDBASE_PROXY_NEEDED";}
 var _tfidf={docs:[],df:{},totalDocs:0};
 function tokenize(s){return s.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]/g," ").split(/\s+/).filter(function(t){return t.length>1||/[\u4e00-\u9fa5]/.test(t);});}
@@ -586,7 +586,7 @@ var knowledgeViews = {};
 try { knowledgeViews = JSON.parse(localStorage.getItem("r434_kv") || "{}"); } catch(e) {}
 var curPath = localStorage.getItem("r434_path") || "", quizIdx = 0, quizQs = [], quizTimer = null, quizSeconds = 0, quizWrong = [];
 
-var DS_URL = "https://ruc434-d4g5fxo6o7fde3402-1445684079.ap-shanghai.app.tcloudbase.com";
+var DS_URL = "https://ruc434-d4g5fxo6o7fde3402-1445684079.ap-shanghai.app.tcloudbase.com/proxyAI";
 function getAPIKey(){return "CLOUDBASE_PROXY_NEEDED";}
 var chatHistory = [];
 try { chatHistory = JSON.parse(localStorage.getItem("r434_chat") || "[]"); } catch(e) {}
@@ -2089,7 +2089,7 @@ function aiGradeQuestion(qid, qid2) {
   sys += '\n\n【RAG检索：相关真题范例与语料】' + ragCtx;
   sys += '\n\n【学生作答】\n' + answer;
   sys += '\n\n请按以下结构输出（用markdown）：\n## 一、评分\n总分XX/10分。各维度打分：知识点覆盖(X/4)、逻辑结构(X/3)、术语准确(X/2)、实际联系(X/1)\n\n## 二、遗漏知识点\n用表格列出：| 遗漏要点 | 应该这样写 |\n\n## 三、优化重写（85分水平）\n保留学生原有思路，但补全结构、术语和遗漏点，重写一份85分水平的答案。\n\n## 四、对照分析\n| 你的版本 | 优化版本 | 差异说明 |\n\n要求：客观、具体、可操作。';
-  fetch('https://ruc434-d4g5fxo6o7fde3402-1445684079.ap-shanghai.app.tcloudbase.com', {
+  fetch('https://ruc434-d4g5fxo6o7fde3402-1445684079.ap-shanghai.app.tcloudbase.com/proxyAI', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + getAPIKey(), 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: 'mimo-v2.5', messages: [{ role: 'user', content: sys }], stream: true, temperature: 0.3, max_tokens: 4096 })
