@@ -1,0 +1,9 @@
+{
+  "name": "proxyAI",
+  "version": "1.0.0",
+  "description": "AI请求代理云函数",
+  "main": "index.js",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}
