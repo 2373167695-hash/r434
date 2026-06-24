@@ -458,7 +458,7 @@ var EXAM_PATTERN = {"total_questions":124,"year_range":"2011-2023","type_distrib
 var macroCount = MACRO_DATA && MACRO_DATA.dashboard ? MACRO_DATA.dashboard.indicators.length : 0;
 document.getElementById("sidebarInfo").textContent = "2011-2023 · " + DATA.length + "题 · " + macroCount + "项指标";
 
-var DS_URL = "https://ruc434-proxy.2373167695.workers.dev";
+var DS_URL = "https://ruc434-d4g5fxo6o7fde3402-1445684079.ap-shanghai.app.tcloudbase.com/proxyAI";
 function getAPIKey(){return "CLOUDBASE_PROXY_NEEDED";}
 var _tfidf={docs:[],df:{},totalDocs:0};
 function tokenize(s){return s.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]/g," ").split(/\s+/).filter(function(t){return t.length>1||/[\u4e00-\u9fa5]/.test(t);});}
@@ -490,67 +490,67 @@ var RUC434_STYLE = '【人大434写作风格——必须严格遵循】\n' +
 
 function buildAIContext(query) {
   var ctx = '';
-  var totalQ = DATA.length;
-  var totalKN = Object.keys(KNOWLEDGE).length;
   
-  // === DECLARATION ===
-  ctx += '【重要声明】你已经拥有完整的人大434国际商务考研数据库，包括：\n';
-  ctx += '· ' + totalQ + ' 道历年真题的完整题目和标准答案\n';
-  ctx += '· ' + totalKN + ' 个知识点的详细讲解\n';
-  ctx += '· 历年命题规律和答题规范\n';
-  ctx += '· 学术热点素材和导师研究方向\n';
-  ctx += '当用户问你是否拥有数据时，必须回答"是"并举例说明。\n\n';
+  // === DECLARATION (minimal) ===
+  ctx += '【声明】你拥有人大434考研数据库（124道真题+48个知识点）。以下是与你当前问题最相关的内容：\n\n';
   
   // === LEARNING PROFILE ===
   var doneQ = 0, starQ = 0;
   DATA.forEach(function(q) { if (marks[q.id] && marks[q.id].done) doneQ++; if (marks[q.id] && marks[q.id].star) starQ++; });
   var viewedKN = Object.keys(knowledgeViews).length;
-  ctx += '【学习者画像】已完成真题：' + doneQ + '/' + totalQ + ' 已浏览知识点：' + viewedKN + '/' + totalKN + '\n\n';
+  ctx += '【学习者画像】已完成真题：' + doneQ + '/124 已浏览知识点：' + viewedKN + '/48\n\n';
   
-  // === ALL EXAM QUESTIONS WITH FULL ANSWERS ===
-  ctx += '=== 全部真题与标准答案（' + totalQ + '道，100%完整，无截断） ===\n\n';
-  var yearGroups = {};
-  DATA.forEach(function(q) {
-    var y = q.year || '未知';
-    if (!yearGroups[y]) yearGroups[y] = [];
-    yearGroups[y].push(q);
-  });
-  Object.keys(yearGroups).sort().forEach(function(year) {
-    ctx += '—— ' + year + '年 ——\n';
-    yearGroups[year].forEach(function(q) {
-      ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】\n';
-      ctx += '题目：' + q.question + '\n';
-      if (q.answer && q.answer.length > 10) {
-        ctx += '标准答案：' + q.answer + '\n';
+  // === TF-IDF RANKING (top 10 relevant questions) ===
+  var qs = [];
+  if (query && _tfidf && _tfidf.docs && _tfidf.docs.length > 0) {
+    var tokens = tokenize(query);
+    DATA.forEach(function(q) {
+      var idx = _tfidf.docs.findIndex(function(d) { return d.id === q.id; });
+      var score = 0;
+      if (idx >= 0) {
+        tokens.forEach(function(t) {
+          score += _tfidf.tfidf[idx] ? (_tfidf.tfidf[idx][t] || 0) : 0;
+        });
       }
-      ctx += '\n';
+      if (score > 0) qs.push({q: q, s: score});
     });
+  }
+  // Fallback: add recent years if TF-IDF returns nothing
+  if (qs.length === 0) {
+    DATA.forEach(function(q) { if (q.year >= 2020) qs.push({q: q, s: 1}); });
+  }
+  qs.sort(function(a, b) { return b.s - a.s; });
+  
+  var shown = 0;
+  ctx += '=== 相关真题与答案（Top 10） ===\n';
+  qs.slice(0, 10).forEach(function(item) {
+    var q = item.q;
+    ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】(相关度:' + item.s.toFixed(1) + ')\n';
+    ctx += '题目：' + q.question + '\n';
+    if (q.answer && q.answer.length > 10) {
+      ctx += '答案：' + q.answer.substring(0, 300) + '\n';
+    }
+    ctx += '\n';
+    shown++;
   });
   
-  // === ALL KNOWLEDGE POINTS ===
-  ctx += '=== 全部知识点（' + totalKN + '个） ===\n\n';
+  // === TOP 5 RELEVANT KNOWLEDGE POINTS ===
+  ctx += '=== 相关知识要点 ===\n';
+  var knList = [];
   for (var k in KNOWLEDGE) {
-    var kn = KNOWLEDGE[k];
-    ctx += '【' + k + '】';
-    if (kn.module) ctx += ' 模块：' + kn.module;
-    ctx += '\n';
-    if (kn.overview) ctx += '概述：' + kn.overview + '\n';
-    if (kn.key && kn.key.length) ctx += '要点：' + kn.key.join('；') + '\n';
-    if (kn.formula) ctx += '公式：' + kn.formula + '\n';
-    if (kn.exam) ctx += '历年考察：' + kn.exam + '\n';
-    ctx += '\n';
+    var kn2 = KNOWLEDGE[k];
+    if (query && kn2.overview && kn2.overview.indexOf(query.substring(0,2)) >= 0) knList.push({k:k, kn:kn2, s:2});
   }
-  
-  // === HOT TOPICS ===
-  if (typeof HOT_TOPICS !== 'undefined' && HOT_TOPICS && HOT_TOPICS.categories) {
-    ctx += '=== 热点素材 ===\n\n';
-    HOT_TOPICS.categories.forEach(function(cat) {
-      ctx += '--- ' + cat.category + ' ---\n';
-      (cat.cards || []).forEach(function(s) {
-        ctx += '【' + s.topic + '】\n背景：' + s.news_brief + '\n预测题目：' + s.predicted_question + '\n\n';
-      });
-    });
+  if (knList.length === 0) {
+    for (var k2 in KNOWLEDGE) { knList.push({k:k2, kn:KNOWLEDGE[k2], s:1}); }
   }
+  knList.slice(0, 5).forEach(function(item) {
+    var kn3 = item.kn;
+    ctx += '【' + item.k + '】';
+    if (kn3.overview) ctx += kn3.overview.substring(0, 150);
+    if (kn3.key && kn3.key.length) ctx += ' 要点：' + kn3.key.slice(0,2).join('；');
+    ctx += '\n';
+  });
   
   return ctx;
 }
@@ -586,7 +586,7 @@ var knowledgeViews = {};
 try { knowledgeViews = JSON.parse(localStorage.getItem("r434_kv") || "{}"); } catch(e) {}
 var curPath = localStorage.getItem("r434_path") || "", quizIdx = 0, quizQs = [], quizTimer = null, quizSeconds = 0, quizWrong = [];
 
-var DS_URL = "https://ruc434-proxy.2373167695.workers.dev";
+var DS_URL = "https://ruc434-d4g5fxo6o7fde3402-1445684079.ap-shanghai.app.tcloudbase.com/proxyAI";
 function getAPIKey(){return "CLOUDBASE_PROXY_NEEDED";}
 var chatHistory = [];
 try { chatHistory = JSON.parse(localStorage.getItem("r434_chat") || "[]"); } catch(e) {}
@@ -2089,7 +2089,7 @@ function aiGradeQuestion(qid, qid2) {
   sys += '\n\n【RAG检索：相关真题范例与语料】' + ragCtx;
   sys += '\n\n【学生作答】\n' + answer;
   sys += '\n\n请按以下结构输出（用markdown）：\n## 一、评分\n总分XX/10分。各维度打分：知识点覆盖(X/4)、逻辑结构(X/3)、术语准确(X/2)、实际联系(X/1)\n\n## 二、遗漏知识点\n用表格列出：| 遗漏要点 | 应该这样写 |\n\n## 三、优化重写（85分水平）\n保留学生原有思路，但补全结构、术语和遗漏点，重写一份85分水平的答案。\n\n## 四、对照分析\n| 你的版本 | 优化版本 | 差异说明 |\n\n要求：客观、具体、可操作。';
-  fetch('https://ruc434-proxy.2373167695.workers.dev', {
+  fetch('https://ruc434-d4g5fxo6o7fde3402-1445684079.ap-shanghai.app.tcloudbase.com/proxyAI', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + getAPIKey(), 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: 'mimo-v2.5', messages: [{ role: 'user', content: sys }], stream: true, temperature: 0.3, max_tokens: 4096 })
