@@ -490,67 +490,46 @@ var RUC434_STYLE = '【人大434写作风格——必须严格遵循】\n' +
 
 function buildAIContext(query) {
   var ctx = '';
+  var totalQ = DATA.length;
+  var totalKN = Object.keys(KNOWLEDGE).length;
   
-  // === DECLARATION (minimal) ===
-  ctx += '【声明】你拥有人大434考研数据库（124道真题+48个知识点）。以下是与你当前问题最相关的内容：\n\n';
+  ctx += '【声明】你拥有人大434考研数据库：' + totalQ + '道真题 + ' + totalKN + '个知识点。以下是全部内容：\n\n';
   
-  // === LEARNING PROFILE ===
   var doneQ = 0, starQ = 0;
   DATA.forEach(function(q) { if (marks[q.id] && marks[q.id].done) doneQ++; if (marks[q.id] && marks[q.id].star) starQ++; });
-  var viewedKN = Object.keys(knowledgeViews).length;
-  ctx += '【学习者画像】已完成真题：' + doneQ + '/124 已浏览知识点：' + viewedKN + '/48\n\n';
+  ctx += '【学习者画像】已完成真题：' + doneQ + '/' + totalQ + ' 已浏览知识点：' + Object.keys(knowledgeViews).length + '/' + totalKN + '\n\n';
   
-  // === TF-IDF RANKING (top 10 relevant questions) ===
-  var qs = [];
-  if (query && _tfidf && _tfidf.docs && _tfidf.docs.length > 0) {
-    var tokens = tokenize(query);
-    DATA.forEach(function(q) {
-      var idx = _tfidf.docs.findIndex(function(d) { return d.id === q.id; });
-      var score = 0;
-      if (idx >= 0) {
-        tokens.forEach(function(t) {
-          score += _tfidf.tfidf[idx] ? (_tfidf.tfidf[idx][t] || 0) : 0;
-        });
-      }
-      if (score > 0) qs.push({q: q, s: score});
+  // ALL exam questions with full answers
+  ctx += '=== 全部真题与标准答案（' + totalQ + '道） ===\n\n';
+  var yearGroups = {};
+  DATA.forEach(function(q) {
+    var y = q.year || '未知';
+    if (!yearGroups[y]) yearGroups[y] = [];
+    yearGroups[y].push(q);
+  });
+  Object.keys(yearGroups).sort().forEach(function(year) {
+    ctx += '—— ' + year + '年 ——\n';
+    yearGroups[year].forEach(function(q) {
+      ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】\n';
+      ctx += '题目：' + q.question + '\n';
+      if (q.answer && q.answer.length > 10) ctx += '答案：' + q.answer + '\n';
+      ctx += '\n';
     });
-  }
-  // Fallback: add recent years if TF-IDF returns nothing
-  if (qs.length === 0) {
-    DATA.forEach(function(q) { if (q.year >= 2020) qs.push({q: q, s: 1}); });
-  }
-  qs.sort(function(a, b) { return b.s - a.s; });
-  
-  var shown = 0;
-  ctx += '=== 相关真题与答案（Top 10） ===\n';
-  qs.slice(0, 10).forEach(function(item) {
-    var q = item.q;
-    ctx += '【' + q.year + '年 第' + q.num + '题 ' + q.type + '】(相关度:' + item.s.toFixed(1) + ')\n';
-    ctx += '题目：' + q.question + '\n';
-    if (q.answer && q.answer.length > 10) {
-      ctx += '答案：' + q.answer.substring(0, 300) + '\n';
-    }
-    ctx += '\n';
-    shown++;
   });
   
-  // === TOP 5 RELEVANT KNOWLEDGE POINTS ===
-  ctx += '=== 相关知识要点 ===\n';
-  var knList = [];
+  // ALL knowledge points
+  ctx += '=== 全部知识点（' + totalKN + '个） ===\n\n';
   for (var k in KNOWLEDGE) {
-    var kn2 = KNOWLEDGE[k];
-    if (query && kn2.overview && kn2.overview.indexOf(query.substring(0,2)) >= 0) knList.push({k:k, kn:kn2, s:2});
-  }
-  if (knList.length === 0) {
-    for (var k2 in KNOWLEDGE) { knList.push({k:k2, kn:KNOWLEDGE[k2], s:1}); }
-  }
-  knList.slice(0, 5).forEach(function(item) {
-    var kn3 = item.kn;
-    ctx += '【' + item.k + '】';
-    if (kn3.overview) ctx += kn3.overview.substring(0, 150);
-    if (kn3.key && kn3.key.length) ctx += ' 要点：' + kn3.key.slice(0,2).join('；');
+    var kn = KNOWLEDGE[k];
+    ctx += '【' + k + '】';
+    if (kn.module) ctx += ' 模块：' + kn.module;
     ctx += '\n';
-  });
+    if (kn.overview) ctx += '概述：' + kn.overview + '\n';
+    if (kn.key && kn.key.length) ctx += '要点：' + kn.key.join('；') + '\n';
+    if (kn.formula) ctx += '公式：' + kn.formula + '\n';
+    if (kn.exam) ctx += '历年考察：' + kn.exam + '\n';
+    ctx += '\n';
+  }
   
   return ctx;
 }
@@ -574,19 +553,16 @@ function sendChat(){
   var md=document.getElementById("c-resp");
   if(!md){md=document.createElement("div");md.className="chat-msg assistant";md.id="c-resp";body.appendChild(md);}
   var key=getAPIKey();
-  if(key==="CLOUDBASE_PROXY_NEEDED"){
-    fetch(DS_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:msgs,temperature:0.3})})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var lx=document.getElementById("c-load");if(lx)lx.remove();
-      md.style.display="";md.innerHTML=renderMarkdown(data.content||data.error||"无响应");
-      chatHistory.push({role:"assistant",content:data.content||""});saveState();
-    })
-    .catch(function(err){
-      var lx=document.getElementById("c-load");if(lx)lx.remove();
-      md.style.display="";md.innerHTML="<span style=color:red>AI请求失败："+err.message+"</span>";
-    });
-  }
+  fetch(DS_URL,{method:"POST",headers:{Authorization:"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({model:"mimo-v2.5",messages:msgs,stream:true,temperature:0.3})})
+  .then(function(r){if(!r.ok)throw Error("HTTP "+r.status);return r.body.getReader();})
+  .then(function(rd){var b="",t="",d=new TextDecoder();function n(){rd.read().then(function(r){
+    if(r.done){var lx=document.getElementById("c-load");if(lx)lx.remove();md.style.display="";md.innerHTML=renderMarkdown(t);
+      chatHistory.push({role:"assistant",content:t});saveState();return;}
+    b+=d.decode(r.value,{stream:true});var ls=b.split("\n");b=ls.pop()||"";
+    ls.forEach(function(l){if(l.startsWith("data: ")){var dd=l.substring(6);if(dd=="[DONE]")return;
+      try{var p=JSON.parse(dd);if(p.choices&&p.choices[0].delta){var x=p.choices[0].delta.content||"";if(x){t+=x;
+        var lx=document.getElementById("c-load");if(lx)lx.remove();md.style.display="";md.innerHTML=renderMarkdown(t);}}}}catch(e){}}});n();})}n();})
+  .catch(function(err){var lx=document.getElementById("c-load");if(lx)lx.remove();md.style.display="";md.innerHTML="<span style=color:red>AI请求失败："+err.message+"</span>";});
 }
 
 // ===== STATE =====
