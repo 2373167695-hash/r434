@@ -1110,37 +1110,23 @@ function sendAIMessage() {
   // Call API — CloudBase proxy mode: non-streaming; Direct mode: SSE streaming
   var apiKey = getAPIKey();
   if (apiKey === 'CLOUDBASE_PROXY_NEEDED') {
-    var att2 = 0;
-    function doChatReq() {
-      fetch(DS_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({messages: msgs, temperature: 0.3})
-      }).then(function(r) { return r.json(); }).then(function(data) {
-        if (data.content) {
-          var loadingEl = document.getElementById(loadingId);
-          if (loadingEl) {
-            loadingEl.innerHTML = renderMarkdown(data.content);
-            loadingEl.id = 'ai-response-' + Date.now();
-          }
-          chatHistory.push({role: 'assistant', content: data.content});
-          saveState();
-          chatBody.scrollTop = chatBody.scrollHeight;
-        } else if (!data.error && att2 < 1) {
-          att2++; doChatReq();
-        } else {
-          var loadingEl = document.getElementById(loadingId);
-          if (loadingEl) loadingEl.innerHTML = renderMarkdown(data.error || data.message || '无响应，请重试');
-        }
-      }).catch(function(err) {
-        if (att2 < 1) { att2++; doChatReq(); }
-        else {
-          var loadingEl = document.getElementById(loadingId);
-          if (loadingEl) loadingEl.innerHTML = '<span style="color:var(--r)">请求失败：' + err.message + '</span>';
-        }
-      });
-    }
-    doChatReq();
+    fetch(DS_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({messages: msgs, temperature: 0.3})
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      var loadingEl = document.getElementById(loadingId);
+      if (loadingEl) {
+        loadingEl.innerHTML = renderMarkdown(data.content || data.error || data.message || '无响应');
+        loadingEl.id = 'ai-response-' + Date.now();
+      }
+      chatHistory.push({role: 'assistant', content: data.content || ''});
+      saveState();
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }).catch(function(err) {
+      var loadingEl = document.getElementById(loadingId);
+      if (loadingEl) loadingEl.innerHTML = '<span style="color:var(--r)">请求失败：' + err.message + '</span>';
+    });
   } else {
     // Direct SSE streaming mode
     fetch(DS_URL, {
@@ -2400,64 +2386,17 @@ function callDSFast(msg, cid) {
   if (!el) return;
   var key = getAPIKey();
   if (!key) { el.innerHTML = '<span style="color:var(--r)">未设置API Key</span>'; return; }
-  el.style.whiteSpace = 'pre-wrap'; el.style.wordBreak = 'break-word'; el.style.overflowWrap = 'break-word'; el.style.maxHeight = '600px'; el.style.overflowY = 'auto'; var ld = aiLoading('思考中'); el.innerHTML = ''; el.appendChild(ld);
-  // Auto-inject 人大434写作风格指南 to first system message
-  var styled = msg.slice();
-  if (styled.length > 0 && styled[0].role === 'system') {
-    styled[0] = {role: 'system', content: RUC434_STYLE + '\n' + styled[0].content};
-  }
-  // CloudBase proxy mode: non-streaming, with retry for cold start
-  if (key === 'CLOUDBASE_PROXY_NEEDED') {
-    var attempt = 0, maxRetry = 1;
-    function doRequest() {
-      fetch(DS_URL, {method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({messages:styled, temperature:0.3})
-      }).then(function(r){return r.json();}).then(function(data){
-        if (data.content) {
-          el.innerHTML = renderMarkdown(data.content);
-          addFollow(cid, el, msg);
-        } else if (!data.error && attempt < maxRetry) {
-          attempt++;
-          doRequest();
-        } else {
-          el.innerHTML = renderMarkdown(data.error || data.message || '无响应，请重试');
-        }
-      }).catch(function(err){
-        if (attempt < maxRetry) { attempt++; doRequest(); }
-        else { el.innerHTML='<span style="color:var(--r)">请求失败：'+err.message+'</span>'; }
-      });
-    }
-    doRequest();
-    return;
-  }
-  // Direct mode: SSE streaming
-  fetch(DS_URL, {method:'POST', headers:{Authorization:'Bearer '+key, 'Content-Type':'application/json'},
-    body: JSON.stringify({model:'mimo-v2.5', messages:styled, stream:true, temperature:0.3})
-  }).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.body.getReader();})
-  .then(function(rd){var b='',t='',d=new TextDecoder();function n(){rd.read().then(function(r){
-    if(r.done){el.innerHTML=renderMarkdown(t);
-  var fid=el.id||cid;
-  if(fid&&!document.getElementById('follow_'+fid)){
-    var fDiv=document.createElement('div');
-    fDiv.id='follow_'+fid;
-    fDiv.style.cssText='margin-top:12px;display:flex;gap:6px';
-    fDiv.innerHTML='<textarea id="fq_'+fid+'" placeholder="继续追问..." style="flex:1;min-height:36px;border:1px solid #d0cdc6;border-radius:8px;padding:8px;font-size:12px;resize:none;font-family:inherit" rows="2"></textarea><button onclick="aiFollowUp(\''+fid+'\')" style="padding:6px 14px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap">追问</button>';
-    el.parentNode.appendChild(fDiv);
-    try{el.setAttribute('data-ctx',JSON.stringify(msg));}catch(e){}
-  }return;}
-    b+=d.decode(r.value,{stream:true});var ls=b.split('\n');b=ls.pop()||'';
-    ls.forEach(function(l){if(l.startsWith('data: ')){var dd=l.substring(6);if(dd=='[DONE]')return;
-      try{var p=JSON.parse(dd);if(p.choices&&p.choices[0].delta){var x=p.choices[0].delta.content||'';if(x){t+=x;el.innerHTML=renderMarkdown(t);
-  var fid=el.id||cid;
-  if(fid&&!document.getElementById('follow_'+fid)){
-    var fDiv=document.createElement('div');
-    fDiv.id='follow_'+fid;
-    fDiv.style.cssText='margin-top:12px;display:flex;gap:6px';
-    fDiv.innerHTML='<textarea id="fq_'+fid+'" placeholder="继续追问..." style="flex:1;min-height:36px;border:1px solid #d0cdc6;border-radius:8px;padding:8px;font-size:12px;resize:none;font-family:inherit" rows="2"></textarea><button onclick="aiFollowUp(\''+fid+'\')" style="padding:6px 14px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap">追问</button>';
-    el.parentNode.appendChild(fDiv);
-    try{el.setAttribute('data-ctx',JSON.stringify(msg));}catch(e){}
-  }}}}catch(e){}}});n();})}n();
-  }).catch(function(err){el.innerHTML='<span style="color:var(--r)">请求失败：'+err.message+'</span>';});
+  el.style.whiteSpace = 'pre-wrap'; el.style.wordBreak = 'break-word'; el.style.overflowWrap = 'break-word'; el.style.maxHeight = '600px'; el.style.overflowY = 'auto';
+  el.innerHTML = '<span style="color:var(--ts)">思考中...</span>';
+  fetch(DS_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({messages: msg, temperature: 0.3})
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    el.innerHTML = renderMarkdown(data.content || data.error || data.message || '无响应');
+  }).catch(function(err) {
+    el.innerHTML = '<span style="color:var(--r)">请求失败：' + err.message + '</span>';
+  });
 }
 
 // 2. 记忆卡AI讲解
