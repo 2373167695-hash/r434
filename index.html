@@ -2672,7 +2672,7 @@ function showHotCategory(idx) {
   document.getElementById('bc').innerHTML = '<span style="cursor:pointer;color:var(--pu);text-decoration:underline" onclick="showHotTopic()">🔥 热点素材</span> <span style="color:var(--ts)">/</span> ' + cat.category;
   var h = '<div class="hero"><h1>' + cat.icon + ' ' + cat.category + '</h1><div class="desc">共 ' + cat.cards.length + ' 个备考专题</div></div>';
   
-  (cat.cards || []).forEach(function(issue) {
+  (cat.cards || []).forEach(function(issue, i) {
     h += '<div class="know-pred-card" style="margin-bottom:16px">';
     h += '<div class="know-pred-hdr" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">';
     h += '<div style="display:flex;align-items:center;gap:8px">';
@@ -2716,8 +2716,8 @@ function showHotCategory(idx) {
       h += '<div style="background:#f0fdf4;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.7;color:#166534"><div style="font-weight:700;margin-bottom:4px">💼 案例</div>' + issue.case_study + '</div>';
     }
     
-    h += '<button onclick="aiHotExplain(\'' + issue.id + '\')" style="margin-top:12px;padding:8px 18px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">🧠 AI深入分析</button>';
-    h += '<div id="hotAI_' + issue.id + '" style="margin-top:10px"></div>';
+    h += '<button onclick="aiHotExplain(\'' + idx + '_' + i + '\')" style="margin-top:12px;padding:8px 18px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">🧠 AI深入分析</button>';
+    h += '<div id="hotAI_' + idx + '_' + i + '" style="margin-top:10px"></div>';
     h += '</div></div>';
   });
   
@@ -2726,8 +2726,11 @@ function showHotCategory(idx) {
 function aiHotExplain(sid) {
   var el = document.getElementById('hotAI_' + sid);
   if (!el) return;
-  var issue = null;
-  (HOT_TOPICS.issues || []).forEach(function(s) { if (s.id === sid) issue = s; });
+  // Parse category index and card index from sid (format: "catIdx_cardIdx")
+  var parts = sid.split('_');
+  var catIdx = parseInt(parts[0]), cardIdx = parseInt(parts[1]);
+  var issue = (HOT_TOPICS.categories[catIdx] && HOT_TOPICS.categories[catIdx].cards) 
+    ? HOT_TOPICS.categories[catIdx].cards[cardIdx] : null;
   if (!issue) return;
   var ctx = (typeof buildAIContext === 'function') ? buildAIContext(issue.topic) : '';
   var sys = '你是人大434考研辅导老师。请针对以下热点专题做深入的考点分析：\n\n【专题】' + issue.topic + '\n【背景】' + issue.news_brief + '\n【预测题目】' + issue.predicted_question + '\n\n【要求】\n1.补充3-5个可能关联的知识点\n2.给出参考答案要点（结构化）\n3.易混淆概念辨析\n4.记忆口诀\n中文，300字内\n\n参考真题与知识库：' + ctx;
