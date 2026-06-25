@@ -567,26 +567,17 @@ function sendChat(){
   ld.innerHTML='<span class="chat-dot"></span><span class="chat-dot"></span><span class="chat-dot"></span>';
   body.appendChild(ld);body.scrollTop=body.scrollHeight;
   chatHistory.push({role:"user",content:q});
-  var ctx=buildAIContext(q);
-  var sys=RUC434_STYLE+"\n你是人大434国际商务考研AI助手。你的数据库中已包含完整的历年真题和标准答案，你随时可以引用任何一道真题。请严格遵循以上写作风格，参考数据库中的真题答案、知识点和热点素材回答问题。公式请用$...$包裹。\n"+ctx;
-  var msgs=[{role:"system",content:sys}];
+  var msgs=[{role:"system",content:"你是人大434国际商务考研AI助手。"}];
   chatHistory.slice(-10).forEach(function(h){msgs.push({role:h.role,content:h.content});});
-  var md=document.getElementById("c-resp");
-  if(!md){md=document.createElement("div");md.className="chat-msg assistant";md.id="c-resp";body.appendChild(md);}
-  var key=getAPIKey();
-  if(key==="CLOUDBASE_PROXY_NEEDED"){
-    fetch(DS_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:msgs,temperature:0.3})})
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var lx=document.getElementById("c-load");if(lx)lx.remove();
-      md.style.display="";md.innerHTML=renderMarkdown(data.content||data.error||"无响应");
-      chatHistory.push({role:"assistant",content:data.content||""});saveState();
-    })
-    .catch(function(err){
-      var lx=document.getElementById("c-load");if(lx)lx.remove();
-      md.style.display="";md.innerHTML="<span style=color:red>AI请求失败："+err.message+"</span>";
-    });
-  }
+  fetch(DS_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:msgs,temperature:0.3})})
+  .then(function(r){return r.json();}).then(function(data){
+    var lx=document.getElementById("c-load");if(lx)lx.remove();
+    var md=document.getElementById("c-resp");if(md){md.style.display="";md.innerHTML=renderMarkdown(data.content||data.error||"无响应");}
+    chatHistory.push({role:"assistant",content:data.content||""});saveState();
+  }).catch(function(err){
+    var lx=document.getElementById("c-load");if(lx)lx.remove();
+    var md=document.getElementById("c-resp");if(md){md.style.display="";md.innerHTML="<span style=color:red>请求失败："+err.message+"</span>";}
+  });
 }
 
 // ===== STATE =====
