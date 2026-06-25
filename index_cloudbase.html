@@ -2272,14 +2272,9 @@ function callDSFast(msg, cid) {
   if (!el) return;
   var key = getAPIKey();
   if (!key) { el.innerHTML = '<span style="color:var(--r)">未设置API Key</span>'; return; }
-  el.style.whiteSpace = 'pre-wrap'; el.style.wordBreak = 'break-word'; el.style.overflowWrap = 'break-word'; el.style.maxHeight = '600px'; el.style.overflowY = 'auto'; var ld = aiLoading('思考中'); el.innerHTML = ''; el.appendChild(ld);
-  // Auto-inject 人大434写作风格指南 to first system message
-  var styled = msg.slice();
-  if (styled.length > 0 && styled[0].role === 'system') {
-    styled[0] = {role: 'system', content: RUC434_STYLE + '\n' + styled[0].content};
-  }
+  el.style.whiteSpace = 'pre-wrap'; el.style.wordBreak = 'break-word'; el.style.overflowWrap = 'break-word'; el.style.maxHeight = '600px'; el.style.overflowY = 'auto'; el.innerHTML = '<span style="color:var(--ts)">思考中...</span>';
   fetch(DS_URL, {method:'POST', headers:{Authorization:'Bearer '+key, 'Content-Type':'application/json'},
-    body: JSON.stringify({model:'mimo-v2.5', messages:styled, stream:true, temperature:0.3})
+    body: JSON.stringify({model:'mimo-v2.5', messages:msg, stream:true, temperature:0.3})
   }).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.body.getReader();})
   .then(function(rd){var b='',t='',d=new TextDecoder();function n(){rd.read().then(function(r){
     if(r.done){el.innerHTML=renderMarkdown(t);
