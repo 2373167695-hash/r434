@@ -389,6 +389,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
       }).catch(function(x){ e.textContent = '网络错误: ' + x.message; });
     });
     </script>
+  </div>
+</div>
 <script>
 window.addEventListener('error', function(e) {
   console.error('Global error:', e.message, e.filename + ':' + e.lineno);
@@ -556,8 +558,6 @@ var knowledgeViews = {};
 try { knowledgeViews = JSON.parse(localStorage.getItem("r434_kv") || "{}"); } catch(e) {}
 var curPath = localStorage.getItem("r434_path") || "", quizIdx = 0, quizQs = [], quizTimer = null, quizSeconds = 0, quizWrong = [];
 
-var DS_URL = "https://api.xiaomimimo.com/v1/chat/completions";
-function getAPIKey(){return "sk-chns1a5ojdfxi52s706a8emohcqdmsa6vpquutjiaxwjmjhm";}
 var chatHistory = [];
 try { chatHistory = JSON.parse(localStorage.getItem("r434_chat") || "[]"); } catch(e) {}
 
