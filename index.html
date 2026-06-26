@@ -295,7 +295,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .login-card{background:var(--card);border-radius:16px;padding:40px 36px;box-shadow:0 4px 24px rgba(0,0,0,.08);border:1px solid var(--bdr);text-align:center;max-width:380px;width:90%}
 .login-card h2{font-size:22px;font-weight:800;margin-bottom:6px;color:var(--t)}
 .login-card p{font-size:13px;color:var(--ts);margin-bottom:24px}
-.login-card input{width:100%;padding:12px 16px;border:2px solid var(--bdr);border-radius:10px;font-size:15px;text-align:center;outline:none;font-family:inherit;letter-spacing:2px;transition:.15s}
+.login-card input{width:100%;padding:12px 16px;border:2px solid var(--bdr);border-radius:10px;font-size:15px;text-align:center;outline:none;font-family:inherit;transition:.15s}.login-card input.user{letter-spacing:0;margin-bottom:12px}
 .login-card input:focus{border-color:var(--pu)}
 .login-card button{width:100%;margin-top:16px;padding:12px;background:var(--pu);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:.15s}
 .login-card button:hover{opacity:.9}
@@ -342,9 +342,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
     <h2>📚 人大434备考系统</h2>
-    <p>输入密码以继续</p>
-    <input type="password" id="loginPwd" placeholder="输入密码" onkeydown="if(event.key==='Enter')doLogin()" autofocus>
+    <p>登录或注册账号</p>
+    <input type="text" id="loginUser" class="user" placeholder="用户名" autofocus>
+    <input type="password" id="loginPwd" placeholder="密码" onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()">登录</button>
+    <button onclick="doRegister()" style="background:#f0fdf4;color:#059669;border:1px solid #a7f3d0;margin-top:8px">注册新账号</button>
     <div class="err" id="loginErr"></div>
     <div class="sync-status" id="syncStatus"></div>
   </div>
@@ -527,26 +529,47 @@ var SYNC_URL = "https://api.ruc434s.cloud";
 var _syncTimer = null;
 
 function doLogin() {
+  var user = (document.getElementById('loginUser')||{}).value.trim();
   var pwd = document.getElementById('loginPwd').value.trim();
-  if (!pwd) return;
+  if (!user || !pwd) { document.getElementById('loginErr').textContent = '请输入用户名和密码'; return; }
   var err = document.getElementById('loginErr');
   err.textContent = '验证中...';
   fetch(SYNC_URL + '/login', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({password: pwd})
+    body: JSON.stringify({username: user, password: pwd})
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.token) {
       localStorage.setItem('r434_token', data.token);
+      localStorage.setItem('r434_user', data.username);
       document.getElementById('loginOverlay').style.display = 'none';
-      // Restore data from cloud
       loadCloudData(data.token);
     } else {
-      err.textContent = data.error || '密码错误';
+      err.textContent = data.error || '登录失败';
     }
-  }).catch(function() {
-    err.textContent = '无法连接服务器，请检查网络';
-  });
+  }).catch(function() { err.textContent = '无法连接服务器'; });
+}
+
+function doRegister() {
+  var user = (document.getElementById('loginUser')||{}).value.trim();
+  var pwd = document.getElementById('loginPwd').value.trim();
+  if (!user || !pwd) { document.getElementById('loginErr').textContent = '请输入用户名和密码'; return; }
+  var err = document.getElementById('loginErr');
+  err.textContent = '注册中...';
+  fetch(SYNC_URL + '/register', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username: user, password: pwd})
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.token) {
+      localStorage.setItem('r434_token', data.token);
+      localStorage.setItem('r434_user', data.username);
+      document.getElementById('loginOverlay').style.display = 'none';
+      err.textContent = '';
+    } else {
+      err.textContent = data.error || '注册失败';
+    }
+  }).catch(function() { err.textContent = '无法连接服务器'; });
 }
 
 function getToken() {
