@@ -530,11 +530,13 @@ var SYNC_URL = "https://api.ruc434s.cloud";
 var _syncTimer = null;
 
 function doLogin() {
-  var user = (document.getElementById('loginUser')||{}).value.trim();
-  var pwd = document.getElementById('loginPwd').value.trim();
-  if (!user || !pwd) { document.getElementById('loginErr').textContent = '请输入用户名和密码'; return; }
+  var userEl = document.getElementById('loginUser');
+  var user = userEl ? userEl.value.trim() : '';
+  var pwdEl = document.getElementById('loginPwd');
+  var pwd = pwdEl ? pwdEl.value.trim() : '';
+  if (!user || !pwd) { var e=document.getElementById('loginErr');if(e)e.textContent='请输入用户名和密码'; return; }
   var err = document.getElementById('loginErr');
-  err.textContent = '验证中...';
+  if(err) err.textContent = '验证中...';
   fetch(SYNC_URL + '/login', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -542,21 +544,24 @@ function doLogin() {
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.token) {
       localStorage.setItem('r434_token', data.token);
-      localStorage.setItem('r434_user', data.username);
-      document.getElementById('loginOverlay').style.display = 'none';
+      localStorage.setItem('r434_user', data.username || user);
+      var ov = document.getElementById('loginOverlay');
+      if (ov) ov.style.display = 'none';
       loadCloudData(data.token);
     } else {
-      err.textContent = data.error || '登录失败';
+      if(err) err.textContent = data.error || '登录失败';
     }
-  }).catch(function() { err.textContent = '无法连接服务器'; });
-}
-
-function doRegister() {
-  var user = (document.getElementById('loginUser')||{}).value.trim();
-  var pwd = document.getElementById('loginPwd').value.trim();
-  if (!user || !pwd) { document.getElementById('loginErr').textContent = '请输入用户名和密码'; return; }
+  }).catch(function(e) { if(err) err.textContent = '网络错误: ' + (e.message || '未知'); });
+}function doRegister() {
+  var userEl = document.getElementById('loginUser');
+  var user = userEl ? userEl.value.trim() : '';
+  var pwdEl = document.getElementById('loginPwd');
+  var pwd = pwdEl ? pwdEl.value.trim() : '';
+  if (!user || !pwd) { var e=document.getElementById('loginErr');if(e)e.textContent='请输入用户名和密码'; return; }
+  if (user.length < 2) { var e=document.getElementById('loginErr');if(e)e.textContent='用户名需2个字符以上'; return; }
+  if (pwd.length < 4) { var e=document.getElementById('loginErr');if(e)e.textContent='密码需4位以上'; return; }
   var err = document.getElementById('loginErr');
-  err.textContent = '注册中...';
+  if(err) err.textContent = '注册中...';
   fetch(SYNC_URL + '/register', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -564,15 +569,15 @@ function doRegister() {
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.token) {
       localStorage.setItem('r434_token', data.token);
-      localStorage.setItem('r434_user', data.username);
-      document.getElementById('loginOverlay').style.display = 'none';
-      err.textContent = '';
+      localStorage.setItem('r434_user', data.username || user);
+      var ov = document.getElementById('loginOverlay');
+      if (ov) ov.style.display = 'none';
+      if(err) err.textContent = '';
     } else {
-      err.textContent = data.error || '注册失败';
+      if(err) err.textContent = data.error || '注册失败';
     }
-  }).catch(function() { err.textContent = '无法连接服务器'; });
+  }).catch(function(e) { if(err) err.textContent = '网络错误: ' + (e.message || '未知'); });
 }
-
 function getToken() {
   return localStorage.getItem('r434_token') || '';
 }
