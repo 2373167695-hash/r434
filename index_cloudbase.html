@@ -274,6 +274,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .ai-sand{display:inline-block;animation:aiFlip 2s infinite ease-in-out;font-size:16px}
 @keyframes aiFlip{0%,100%{transform:rotate(0deg)}50%{transform:rotate(180deg)}}
 
+/* ===== MACRO DAILY REPORT ===== */
+.macro-card{background:var(--card);border-radius:12px;border:1px solid var(--bdr);overflow:hidden;margin-bottom:16px}
+.macro-card-hdr{padding:16px 22px;border-bottom:1px solid var(--bdr)}
+.macro-card-hdr h3{font-size:16px;font-weight:700}
+.macro-card-body{padding:18px 22px}
+.macro-highlight ul{padding-left:20px;margin:0}
+.macro-highlight li{font-size:13px;line-height:1.9;padding:4px 0}
+.macro-section{margin:18px 0}
+.macro-section h4{font-size:14px;font-weight:700;margin-bottom:10px}
+.macro-item{margin-bottom:12px;padding:12px;background:var(--bg);border-radius:8px}
+.macro-item h5{font-size:13px;font-weight:600;margin-bottom:4px}
+.macro-item p{font-size:12px;color:var(--ts);line-height:1.6}
+.macro-data-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}
+.macro-data-item{background:var(--bg);padding:10px 12px;border-radius:6px;text-align:center}
+.macro-data-item .label{font-size:11px;color:var(--ts);margin-bottom:4px}
+.macro-data-item .value{font-size:16px;font-weight:700;color:var(--t)}
 /* ===== LOGIN ===== */
 .login-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column}
 .login-card{background:var(--card);border-radius:16px;padding:40px 36px;box-shadow:0 4px 24px rgba(0,0,0,.08);border:1px solid var(--bdr);text-align:center;max-width:380px;width:90%}
@@ -1772,9 +1788,10 @@ function showCat(name) {
   c.subs.forEach(function(s) {
     var n = 0;
     s.topics.forEach(function(t) { n += t.count; });
-    h += '<div class="gc" onclick="navigate(\'sub:' + name + '/' + s.name + '\')"><h4>' + s.name + '</h4>' +
-         '<p>' + s.topics.length + '个知识点 · ' + n + '道真题</p>' +
-         '<div class="bar"><div class="bi" style="width:' + Math.min(100, n / 8 * 100) + '%"></div></div></div>';
+    h += '<div class="gc" onclick="navigate(\'sub:' + name + '/' + s.name + '\')">' +
+      '<div class="ico" style="background:var(--panel-bg)">📂</div>' +
+      '<div class="cnt"><h4>' + s.name + '</h4><p>' + s.topics.length + '个知识点 · ' + n + '道真题</p></div>' +
+      '<div class="right"><div class="pct">' + s.topics.length + '</div><div class="lbl">知识点</div></div></div>';
   });
   h += '</div>';
   document.getElementById("ct").innerHTML = h;
@@ -1790,9 +1807,10 @@ function showSub(path) {
   document.getElementById("bc").innerHTML = cn + ' / <span>' + sn + '</span>';
   var h = '<div class="hero"><h1>' + sn + '</h1><div class="desc">' + s.topics.length + '个知识点</div></div><div class="grid">';
   s.topics.forEach(function(t) {
-    h += '<div class="gc" onclick="navigate(\'' + t.path + '\')"><h4>' + t.name + '</h4>' +
-         '<p>' + t.count + '道相关真题</p>' +
-         '<div class="bar"><div class="bi" style="width:' + Math.min(100, t.count / 5 * 100) + '%"></div></div></div>';
+    h += '<div class="gc" onclick="navigate(\'' + t.path + '\')">' +
+      '<div class="ico" style="background:var(--panel-bg)">📄</div>' +
+      '<div class="cnt"><h4>' + t.name + '</h4><p>' + t.count + '道相关真题</p></div>' +
+      '<div class="right"><div class="pct">' + t.count + '</div><div class="lbl">真题</div></div></div>';
   });
   h += '</div>';
   document.getElementById("ct").innerHTML = h;
