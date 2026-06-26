@@ -198,6 +198,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .loading{text-align:center;padding:60px;color:var(--ts)}
 .loading .spinner{display:inline-block;width:30px;height:30px;border:3px solid #e5e2db;border-top-color:var(--r);border-radius:50%;animation:spin 1s linear infinite}
 
+/* ===== DASHBOARD & MACRO ===== */
+.dash-hero{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px}
+.dash-metric{background:var(--card);border-radius:10px;padding:16px 18px;border:1px solid var(--bdr);transition:.15s}
+.dash-metric:hover{border-color:var(--pu);box-shadow:0 2px 8px rgba(91,91,214,.06)}
+.dash-metric .label{font-size:11px;color:var(--ts);margin-bottom:6px}
+.dash-metric .value{font-size:22px;font-weight:800;color:var(--t)}
+.dash-metric .change{font-size:11px;margin-top:4px}
+.dash-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.dash-chart-card{background:var(--card);border-radius:10px;padding:18px;border:1px solid var(--bdr)}
+.dash-chart-card h4{font-size:13px;font-weight:700;margin-bottom:8px}
+.dash-chart-card .subtitle{font-size:11px;color:var(--ts)}
+.macro-section-header{margin:24px 0 14px;padding-bottom:10px;border-bottom:2px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.macro-section-header h3{font-size:16px;font-weight:700}
 /* ===== LOGIN ===== */
 .login-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column}
 .login-card{background:var(--card);border-radius:16px;padding:40px 36px;box-shadow:0 4px 24px rgba(0,0,0,.08);border:1px solid var(--bdr);text-align:center;max-width:380px;width:90%}
@@ -624,7 +637,8 @@ function showHome() {var bb=document.getElementById('backBtn');if(bb)bb.classLis
   var n = DATA.length, kn = Object.keys(KNOWLEDGE).length, pn = Object.keys(PROFESSORS).length, prn = PREDICTIONS.length;
   var s = DATA.filter(function(q) { return marks[q.id] && marks[q.id].star; }).length;
   var d = DATA.filter(function(q) { return marks[q.id] && marks[q.id].done; }).length;
-  var h = '<div class="hero"><h1>📖 人大434国际商务 · 备考系统</h1>' +
+  var h = '<div class="banner" style="margin-bottom:16px"><div class="ico">📅</div><div class="txt"><strong>距离初试约 180 天</strong>已完成 ' + d + '/' + n + ' 道真题，掌握度最高的模块是跨国公司 & 国际化。</div><button class="btn" onclick="navigate(\'allquestions\')" style="background:var(--or);color:#fff;border:none">开始刷题 →</button></div>' +
+    '<div class="hero"><h1>📖 人大434国际商务 · 备考系统</h1>' +
     '<div class="desc">基于2011-2023年13年真题 + 两院最新学术动态，构建"学术预测→知识点→真题"三位一体的备考体系。</div>' +
     '<div class="sts"><div class="st">📝 <strong>' + n + '</strong>道真题</div>' +
     '<div class="st">📚 <strong>' + kn + '</strong>个知识模块</div>' +
