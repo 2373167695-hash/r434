@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-27 12:55 · modular -->
+<!-- v2.1 · 2026-06-27 13:00 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -909,14 +909,10 @@ function pushNav(p) {
 
 function goBack() {
   if (navStack.length > 1) {
-    navStack.pop(); // remove current
-    var prev = navStack[navStack.length-1];
-    navigate(prev, undefined, true); // skipHistory = true
-  } else if (curPath && curPath !== '') {
-    navStack = [];
-    navigate('', undefined, true);
+    navStack.pop();
+    navigate(navStack[navStack.length-1], undefined, true);
   } else {
-    closeSidebar();
+    navigate('', undefined, true);
   }
 }
 
@@ -967,8 +963,8 @@ function navigate(p, topicName, skipHistory) {
   // Push to history (skip when going back)
   if (!skipHistory && p !== undefined) pushNav(p);
   var bb = document.getElementById('backBtn');
-  // Show back button if there's history to go back to
-  if (bb) { if (navStack.length > 1 || (p && p !== '')) bb.classList.add('show'); else bb.classList.remove('show'); }
+  // Show back button when NOT on home page
+  if (bb) bb.style.display = (p && p !== '') ? 'block' : 'none';
   curPath = p; saveState();
   if (p && p.indexOf('kn:') === 0) {
     var kn = p.substring(3);
@@ -1029,7 +1025,7 @@ function navigate(p, topicName, skipHistory) {
 }
 
 // ===== PAGES =====
-function showHome() {var bb=document.getElementById('backBtn');if(bb)bb.classList.remove('show');
+function showHome() {var bb=document.getElementById('backBtn');if(bb)bb.style.display='none';
   document.getElementById("bc").innerHTML = "首页";
   var n = DATA.length, kn = Object.keys(KNOWLEDGE).length, pn = Object.keys(PROFESSORS).length, prn = PREDICTIONS.length;
   var s = DATA.filter(function(q) { return marks[q.id] && marks[q.id].star; }).length;
