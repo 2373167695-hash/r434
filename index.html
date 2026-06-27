@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-27 09:15 · modular -->
+<!-- v2.1 · 2026-06-27 11:34 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -887,26 +887,27 @@ function showHome() {var bb=document.getElementById('backBtn');if(bb)bb.classLis
     var pct = total > 0 ? Math.round(done / total * 100) : 0;
     if (pct > bestPct) { bestPct = pct; bestMod = c.name; }
   });
-  var h = '<div class="banner" style="margin-bottom:16px"><div class="ico">📅</div><div class="txt"><strong>距离初试约 180 天</strong>已完成 ' + d + '/' + n + ' 道真题' + (bestMod ? '，掌握度最高的模块是' + bestMod + '（' + bestPct + '%）' : '') + '。</div><button class="btn" onclick="navigate(\'allquestions\')" style="background:var(--or);color:#fff;border:none">开始刷题 →</button></div>';
-  h += '<div class="today" style="margin-bottom:16px"><h3>📋 今日推荐</h3><div class="sub">已完成 ' + d + '/' + n + ' 题 · 重点 ' + s + ' 题 · 本周学习 3.5h</div>' +
-    '<div class="tasks">' +
-    '<div class="task" onclick="navigate(\'allquestions\')"><div class="num" style="background:#f5f3ff;color:#7c3aed">1</div><div class="info"><h4>刷题练习</h4><p>' + (n-d) + ' 道真题待完成</p></div></div>' +
-    '<div class="task" onclick="navigate(\'cards\')"><div class="num" style="background:#ecfdf5;color:#059669">2</div><div class="info"><h4>记忆卡片</h4><p>SM-2 间隔复习 · ' + Object.keys(KNOWLEDGE).length + ' 张卡片</p></div></div>' +
-    '<div class="task" onclick="navigate(\'aichat\')"><div class="num" style="background:#fffbeb;color:#d97706">3</div><div class="info"><h4>AI 备考助手</h4><p>问考点分析、出题预测、答题技巧</p></div></div></div></div>';
+  var h = '';
 
+  // Hero card (matching iOS 26 preview layout)
   h += '<div class="hero"><h1>📖 人大434国际商务 · 备考系统</h1>' +
     '<div class="desc">2011-2023年13年真题 · ' + kn + '个知识模块 · 学术预测+导师追踪+AI诊断</div>' +
-    '<div class="sts"><div class="st">📝 <strong>' + n + '</strong>道真题</div>' +
-    '<div class="st">📚 <strong>' + kn + '</strong>个模块</div>' +
-    '<div class="st">👨‍🏫 <strong>' + pn + '</strong>位导师</div>' +
-    '<div class="st">🎯 <strong>' + prn + '</strong>个预测</div>' +
-    '<div class="st">⭐ <strong>' + s + '</strong>重点题</div>' +
-    '<div class="st">✅ <strong>' + d + '</strong>已做</div></div></div>';
+    '<div class="sts"><div class="st">📝 <strong>' + n + '</strong> 道真题</div>' +
+    '<div class="st">📚 <strong>' + kn + '</strong> 个模块</div>' +
+    '<div class="st">👨‍🏫 <strong>' + pn + '</strong> 位导师</div>' +
+    '<div class="st">🎯 <strong>' + prn + '</strong> 个预测</div>' +
+    '<div class="st">⭐ <strong>' + s + '</strong> 重点题</div>' +
+    '<div class="st">✅ <strong>' + d + '</strong> 已做</div></div></div>';
+
+  // Today tasks row
+  h += '<div class="today" style="margin-bottom:16px"><div class="tasks">' +
+    '<div class="task" onclick="navigate(\'allquestions\')"><div class="num" style="background:rgba(94,92,230,.08);color:var(--pu)">1</div><div class="info"><h4>刷题练习</h4><p>' + (n-d) + ' 道真题待完成</p></div></div>' +
+    '<div class="task" onclick="navigate(\'cards\')"><div class="num" style="background:rgba(48,209,88,.08);color:var(--gn)">2</div><div class="info"><h4>记忆卡片</h4><p>SM-2 间隔复习 · ' + Object.keys(KNOWLEDGE).length + ' 张卡片</p></div></div>' +
+    '<div class="task" onclick="navigate(\'aichat\')"><div class="num" style="background:rgba(255,159,10,.08);color:var(--or)">3</div><div class="info"><h4>AI 备考助手</h4><p>问考点分析、出题预测、答题技巧</p></div></div></div></div>';
 
   // Knowledge modules grid
   h += '<div class="sec-hd"><h3>📚 知识模块</h3></div><div class="grid">';
   SIDEBAR.forEach(function(c) {
-    // Calculate real mastery: done questions in this category / total questions
     var catQids = {};
     var catTotal = 0;
     c.subs.forEach(function(s) {
@@ -933,13 +934,13 @@ function showHome() {var bb=document.getElementById('backBtn');if(bb)bb.classLis
   });
   h += '</div>';
 
-  // Quick links row
+  // Quick links row (styled as grid cards)
   h += '<div class="sec-hd" style="margin-top:0"><h3>🔗 快捷入口</h3></div>';
   h += '<div class="grid">';
   h += '<div class="gc" onclick="navigate(\'macro\')"><div class="ico" style="background:var(--panel-bg)">📊</div><div class="cnt"><h4>宏观经济数据大屏</h4><p>人民币指数+汇率走势+宏观热点+出题预测</p></div></div>';
-  h += '<div class="gc" onclick="navigate(\'predictions\')"><div class="ico" style="background:var(--amber-bg)">🎯</div><div class="cnt"><h4>学术热点预测</h4><p>基于两院最新研究，预测2027年可能考点</p></div></div>';
-  h += '<div class="gc" onclick="navigate(\'professors\')"><div class="ico" style="background:#eff6ff">👨‍🏫</div><div class="cnt"><h4>导师研究方向</h4><p>' + pn + '位重点导师的研究领域与最新成果</p></div></div>';
-  h += '<div class="gc" onclick="navigate(\'hot\')"><div class="ico" style="background:#f5f3ff">🔥</div><div class="cnt"><h4>热点素材解读</h4><p>跨国公司平台经济 · ESA理论与MNPs</p></div></div>';
+  h += '<div class="gc" onclick="navigate(\'predictions\')"><div class="ico" style="background:rgba(255,159,10,.08)">🎯</div><div class="cnt"><h4>学术热点预测</h4><p>基于两院最新研究，预测2027年可能考点</p></div></div>';
+  h += '<div class="gc" onclick="navigate(\'professors\')"><div class="ico" style="background:rgba(0,122,255,.08)">👨‍🏫</div><div class="cnt"><h4>导师研究方向</h4><p>' + pn + '位重点导师的研究领域与最新成果</p></div></div>';
+  h += '<div class="gc" onclick="navigate(\'hot\')"><div class="ico" style="background:rgba(94,92,230,.08)">🔥</div><div class="cnt"><h4>热点素材解读</h4><p>跨国公司平台经济 · ESA理论与MNPs</p></div></div>';
   h += '</div>';
   // Year × Module heatmap
   var ymodules = ['国际贸易','国际投资与跨国公司','国际金融','新兴议题'];
