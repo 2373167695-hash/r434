@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-26 16:29 · modular -->
+<!-- v2.1 · 2026-06-27 01:03 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -69,6 +69,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .topbar input:focus{border-color:var(--pu);box-shadow:0 0 0 3px rgba(99,102,241,.1);background:#fff}
 .content{flex:1;overflow-y:auto;padding:24px 28px 48px}
 .content::-webkit-scrollbar{width:5px}.content::-webkit-scrollbar-thumb{background:#d4d0c8;border-radius:3px}.content::-webkit-scrollbar-thumb:hover{background:#b8b4ac}
+.content-fade-in{animation:contentFade .25s ease-out}
+@keyframes contentFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.skeleton-line{height:14px;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;margin-bottom:10px}
+.skeleton-line.short{width:60%}.skeleton-line.medium{width:80%}.skeleton-line.title{height:22px;width:40%;margin-bottom:16px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* ===== BANNER ===== */
 .banner{background:linear-gradient(135deg,#fef3c7 0%,#fef9c3 50%,#fefce8 100%);border-radius:var(--radius-lg);padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;border:1px solid var(--amber-border);position:relative;overflow:hidden}
@@ -790,6 +795,13 @@ function navigate(p, topicName) {
   }
   setActive(p);
   if (!p && p !== '') return;
+  // Show skeleton loading state
+  var ct = document.getElementById('ct');
+  if (ct) {
+    ct.innerHTML = '<div style="padding:24px"><div class="skeleton-line title"></div><div class="skeleton-line"></div><div class="skeleton-line medium"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div><div class="skeleton-line medium"></div></div>';
+  }
+  // Render actual content on next frame so skeleton is visible
+  requestAnimationFrame(function() {
   if (p === '') { showHome(); }
   else if (p === 'answerbank') { showAnswerBank(); }
   else if (p === 'stats') { showStats(); }
@@ -806,6 +818,10 @@ function navigate(p, topicName) {
   else if (p.indexOf('sub:') === 0) { showSub(p.substring(4)); }
   else if (topicName === 'qz') { showTopic(p, 'knQuestions'); }
   else { showTopic(p); }
+  // Add fade-in animation
+  var content = document.getElementById('ct');
+  if (content) { content.classList.remove('content-fade-in'); void content.offsetWidth; content.classList.add('content-fade-in'); }
+  }); // end requestAnimationFrame
 }
 
 // ===== PAGES =====
@@ -814,7 +830,17 @@ function showHome() {var bb=document.getElementById('backBtn');if(bb)bb.classLis
   var n = DATA.length, kn = Object.keys(KNOWLEDGE).length, pn = Object.keys(PROFESSORS).length, prn = PREDICTIONS.length;
   var s = DATA.filter(function(q) { return marks[q.id] && marks[q.id].star; }).length;
   var d = DATA.filter(function(q) { return marks[q.id] && marks[q.id].done; }).length;
-  var h = '<div class="banner" style="margin-bottom:16px"><div class="ico">📅</div><div class="txt"><strong>距离初试约 180 天</strong>已完成 ' + d + '/' + n + ' 道真题，掌握度最高的模块是跨国公司 & 国际化。</div><button class="btn" onclick="navigate(\'allquestions\')" style="background:var(--or);color:#fff;border:none">开始刷题 →</button></div>';
+  // Find best-performing module
+  var bestMod = '', bestPct = 0;
+  SIDEBAR.forEach(function(c) {
+    var catQids = {};
+    c.subs.forEach(function(s) { s.topics.forEach(function(t) { var ids = TQM[t.path]; if (ids) ids.split(',').forEach(function(id) { catQids[id] = true; }); }); });
+    var total = Object.keys(catQids).length, done = 0;
+    for (var qid in catQids) { if (marks[qid] && marks[qid].done) done++; }
+    var pct = total > 0 ? Math.round(done / total * 100) : 0;
+    if (pct > bestPct) { bestPct = pct; bestMod = c.name; }
+  });
+  var h = '<div class="banner" style="margin-bottom:16px"><div class="ico">📅</div><div class="txt"><strong>距离初试约 180 天</strong>已完成 ' + d + '/' + n + ' 道真题' + (bestMod ? '，掌握度最高的模块是' + bestMod + '（' + bestPct + '%）' : '') + '。</div><button class="btn" onclick="navigate(\'allquestions\')" style="background:var(--or);color:#fff;border:none">开始刷题 →</button></div>';
   h += '<div class="today" style="margin-bottom:16px"><h3>📋 今日推荐</h3><div class="sub">已完成 ' + d + '/' + n + ' 题 · 重点 ' + s + ' 题 · 本周学习 3.5h</div>' +
     '<div class="tasks">' +
     '<div class="task" onclick="navigate(\'allquestions\')"><div class="num" style="background:#f5f3ff;color:#7c3aed">1</div><div class="info"><h4>刷题练习</h4><p>' + (n-d) + ' 道真题待完成</p></div></div>' +
@@ -833,7 +859,24 @@ function showHome() {var bb=document.getElementById('backBtn');if(bb)bb.classLis
   // Knowledge modules grid
   h += '<div class="sec-hd"><h3>📚 知识模块</h3></div><div class="grid">';
   SIDEBAR.forEach(function(c) {
-    var pct = Math.floor(40 + Math.random() * 50); // Placeholder - will be real data later
+    // Calculate real mastery: done questions in this category / total questions
+    var catQids = {};
+    var catTotal = 0;
+    c.subs.forEach(function(s) {
+      s.topics.forEach(function(t) {
+        var ids = TQM[t.path];
+        if (ids) {
+          ids.split(',').forEach(function(id) {
+            if (!catQids[id]) { catQids[id] = true; catTotal++; }
+          });
+        }
+      });
+    });
+    var catDone = 0;
+    for (var qid in catQids) {
+      if (marks[qid] && marks[qid].done) catDone++;
+    }
+    var pct = catTotal > 0 ? Math.round(catDone / catTotal * 100) : 0;
     var pctClass = pct >= 80 ? 'hi' : pct >= 50 ? 'mid' : 'lo';
     h += '<div class="gc" onclick="navigate(\'cat:' + c.name + '\')">' +
       '<div class="ico" style="background:var(--panel-bg)">' + c.icon + '</div>' +
@@ -2082,8 +2125,22 @@ function toggleM(id, type) {
   if (!marks[id]) marks[id] = {};
   marks[id][type] = !marks[id][type];
   localStorage.setItem("r434", JSON.stringify(marks));
-  // Just update the button class, don't re-navigate
-  var btns = document.querySelectorAll('.qa2 button');
+  // When marking a question as done, boost related flashcard priority
+  if (type === 'done' && marks[id].done) {
+    var q = null; DATA.forEach(function(x) { if (x.id === id) q = x; });
+    if (q && q.knowledge && q.knowledge.length) {
+      var cardLog = JSON.parse(localStorage.getItem('r434_cards') || '{}');
+      q.knowledge.forEach(function(kn) {
+        if (cardLog[kn]) {
+          // Reset interval to 1 day so it appears in "due" cards soon
+          cardLog[kn].interval = 1;
+          cardLog[kn].date = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+          cardLog[kn]._source = 'auto-from-wrong';
+        }
+      });
+      localStorage.setItem('r434_cards', JSON.stringify(cardLog));
+    }
+  }
   // Re-render current page to update all marks
   if (curPath && curPath !== '') navigate(curPath);
   else showHome();
@@ -2634,6 +2691,17 @@ function showCards() {
   var today = new Date().toISOString().slice(0,10);
   var dueCount = 0;
   var names=Object.keys(KNOWLEDGE).sort();
+  // Sort: due cards first, then by priority (from wrong answers)
+  names.sort(function(a, b) {
+    var la = cardLog[a] || {}, lb = cardLog[b] || {};
+    var dueA = !la.date || (new Date() - new Date(la.date)) > (la.interval || 1) * 86400000;
+    var dueB = !lb.date || (new Date() - new Date(lb.date)) > (lb.interval || 1) * 86400000;
+    if (dueA !== dueB) return dueA ? -1 : 1;
+    var priA = la._source === 'auto-from-wrong' ? 1 : 0;
+    var priB = lb._source === 'auto-from-wrong' ? 1 : 0;
+    if (priA !== priB) return priB - priA;
+    return a.localeCompare(b);
+  });
   var cardsHtml = '';
   names.forEach(function(kn){
     var item=KNOWLEDGE[kn];
@@ -2819,46 +2887,67 @@ function doSearch() {
   if (!kw) { navigate(curPath); return; }
   var kwl = kw.toLowerCase();
   document.getElementById("bc").innerHTML = '🔍 搜索：<span>' + kw + '</span>';
-  var qResults = [], knResults = [], hotResults = [], abResults = [];
-  
-  // Search questions
-  DATA.forEach(function(q) {
-    var score = 0;
-    if (q.question.indexOf(kw) >= 0) score += 10;
-    else if (q.question.toLowerCase().indexOf(kwl) >= 0) score += 5;
-    if (q.answer && q.answer.indexOf(kw) >= 0) score += 8;
-    if (q.knowledge) q.knowledge.forEach(function(k) { if (k.indexOf(kw) >= 0 || kw.indexOf(k) >= 0) score += 2; });
-    if (score > 0) qResults.push(Object.assign({score: score}, q));
-  });
-  qResults.sort(function(a, b) { return b.score - a.score; });
+  var qResults = [], knResults = [], hotResults = [], abResults = [], profResults = [];
 
-  // Search knowledge with snippets
+  // 1. Search knowledge points FIRST (highest priority)
   for (var k in KNOWLEDGE) {
     var item = KNOWLEDGE[k], score = 0, sn = '';
-    if (k.indexOf(kw) >= 0) { score += 20; sn = k; }
-    else if (k.toLowerCase().indexOf(kwl) >= 0) score += 10;
-    if (item.overview && item.overview.indexOf(kw) >= 0) { score += 8; sn = sn || item.overview; }
+    if (k === kw) { score += 50; sn = k; }
+    else if (k.indexOf(kw) >= 0) { score += 30; sn = k; }
+    else if (k.toLowerCase().indexOf(kwl) >= 0) { score += 20; sn = k; }
+    if (item.overview && item.overview.indexOf(kw) >= 0) { score += 8; sn = sn || item.overview.substring(0, 80); }
     if (item.key) item.key.forEach(function(x) { if (x.indexOf(kw) >= 0) score += 5; });
     if (score > 0) knResults.push({name: k, score: score, module: item.module || '', snippet: sn});
   }
   knResults.sort(function(a, b) { return b.score - a.score; });
 
-  // Search hot topics
-  if (typeof HOT_TOPICS !== 'undefined' && HOT_TOPICS && HOT_TOPICS.issues) {
-    HOT_TOPICS.issues.forEach(function(s) {
-      if (s.content.indexOf(kw) >= 0) hotResults.push({title: s.title, id: s.id, snippet: s.content});
-    });
+  // 2. Search questions (title weighted more than answer)
+  DATA.forEach(function(q) {
+    var score = 0;
+    if (q.question.indexOf(kw) >= 0) score += 15;
+    else if (q.question.toLowerCase().indexOf(kwl) >= 0) score += 8;
+    if (q.answer && q.answer.indexOf(kw) >= 0) score += 5;
+    if (q.knowledge) q.knowledge.forEach(function(k) { if (k.indexOf(kw) >= 0 || kw.indexOf(k) >= 0) score += 3; });
+    if (score > 0) qResults.push(Object.assign({score: score}, q));
+  });
+  qResults.sort(function(a, b) { return b.score - a.score; });
+
+  // 3. Search professors
+  if (typeof PROFESSORS !== 'undefined') {
+    for (var name in PROFESSORS) {
+      var p = PROFESSORS[name], score = 0;
+      if (name.indexOf(kw) >= 0) score += 20;
+      if (p.research) p.research.forEach(function(r) { if (r.indexOf(kw) >= 0) score += 10; });
+      if (p.recent && p.recent.indexOf(kw) >= 0) score += 5;
+      if (p.exam_link && p.exam_link.indexOf(kw) >= 0) score += 8;
+      if (score > 0) profResults.push({name: name, score: score, data: p});
+    }
+    profResults.sort(function(a, b) { return b.score - a.score; });
   }
 
-  // Search answer bank
+  // 4. Search hot topics
+  if (typeof HOT_TOPICS !== 'undefined' && HOT_TOPICS && HOT_TOPICS.categories) {
+    HOT_TOPICS.categories.forEach(function(cat) {
+      (cat.cards || []).forEach(function(s) {
+        var score = 0;
+        if (s.topic.indexOf(kw) >= 0) score += 10;
+        if (s.news_brief && s.news_brief.indexOf(kw) >= 0) score += 5;
+        if (s.predicted_question && s.predicted_question.indexOf(kw) >= 0) score += 8;
+        if (score > 0) hotResults.push({title: s.topic, score: score, snippet: s.news_brief});
+      });
+    });
+    hotResults.sort(function(a, b) { return b.score - a.score; });
+  }
+
+  // 5. Search answer bank
   if (ANSWER_BANK && ANSWER_BANK.categories) {
     ANSWER_BANK.categories.forEach(function(c) { c.items.forEach(function(it) {
       if (it.name.indexOf(kw) >= 0 || (it.content && it.content.indexOf(kw) >= 0)) abResults.push(it);
     });});
   }
 
-  var total = qResults.length + knResults.length + hotResults.length + abResults.length;
-  var h = '<div class="hero"><h1>🔍 搜索「' + kw + '」</h1><div class="desc">共找到 <strong>' + total + '</strong> 条结果（真题' + qResults.length + ' · 知识点' + knResults.length + ' · 热点' + hotResults.length + ' · 语料' + abResults.length + '）</div></div>';
+  var total = qResults.length + knResults.length + hotResults.length + abResults.length + profResults.length;
+  var h = '<div class="hero"><h1>🔍 搜索「' + kw + '」</h1><div class="desc">共找到 <strong>' + total + '</strong> 条结果（知识点' + knResults.length + ' · 真题' + qResults.length + ' · 导师' + profResults.length + ' · 热点' + hotResults.length + ' · 语料' + abResults.length + '）</div></div>';
 
   // Knowledge results with snippets
   if (knResults.length) {
@@ -2881,6 +2970,17 @@ function doSearch() {
       h += '<div onclick="navigate(\'hot\')" style="padding:10px 14px;margin:4px 0;background:#fafaf7;border-radius:8px;cursor:pointer"><strong style="color:#7c3aed">' + r.title + '</strong>';
       var ps = r.snippet.indexOf(kw), s2 = Math.max(0, ps - 30), e2 = Math.min(r.snippet.length, ps + kw.length + 40);
       h += '<br><span style="font-size:12px;color:#666">...' + r.snippet.substring(s2, e2).replace(kw, '<mark>' + kw + '</mark>') + '...</span>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+  }
+
+  // Professor results
+  if (profResults.length) {
+    h += '<div class="pcard"><div class="pcard-hdr"><h3>👨‍🏫 导师（' + profResults.length + '位）</h3></div><div class="pcard-body">';
+    profResults.forEach(function(r) {
+      h += '<div onclick="navigate(\'professors\')" style="padding:10px 14px;margin:4px 0;background:#fafaf7;border-radius:8px;cursor:pointer"><strong style="color:var(--gn)">' + r.name + '</strong><span style="font-size:11px;color:#999;margin-left:8px">' + (r.data.title||'') + '</span>';
+      if (r.data.research) h += '<br><span style="font-size:12px;color:#666">研究方向：' + r.data.research.join('、') + '</span>';
       h += '</div>';
     });
     h += '</div></div>';
