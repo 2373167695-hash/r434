@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-27 12:42 · modular -->
+<!-- v2.1 · 2026-06-27 12:48 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -895,10 +895,34 @@ function setActive(p) {
   if (a) a.classList.add("active");
 }
 
+// ===== NAVIGATION HISTORY STACK =====
+var navStack = [];
+try { navStack = JSON.parse(localStorage.getItem('r434_nav') || '[]'); } catch(e) { navStack = []; }
+
+function pushNav(p) {
+  if (navStack.length === 0 || navStack[navStack.length-1] !== p) {
+    navStack.push(p);
+    if (navStack.length > 20) navStack.shift();
+    try { localStorage.setItem('r434_nav', JSON.stringify(navStack)); } catch(e) {}
+  }
+}
+
 function goBack() {
-  var bb = document.getElementById('backBtn');
-  if (curPath && curPath !== '') { navigate(''); }
-  else { closeSidebar(); }
+  if (navStack.length > 1) {
+    navStack.pop(); // remove current
+    var prev = navStack[navStack.length-1];
+    navigate(prev, undefined, true); // skipHistory = true
+  } else if (curPath && curPath !== '') {
+    navStack = [];
+    navigate('', undefined, true);
+  } else {
+    closeSidebar();
+  }
+}
+
+function clearNavStack() {
+  navStack = [];
+  try { localStorage.removeItem('r434_nav'); } catch(e) {}
 }
 function toggleSidebar() {
   var sb = document.querySelector('.sidebar');
@@ -913,7 +937,7 @@ function closeSidebar() {
   var sb = document.querySelector('.sidebar');
   if (sb) sb.classList.remove('open');
 }
-function navigate(p, topicName) {
+function navigate(p, topicName, skipHistory) {
   // Clean up AI fullpage if navigating away from it
   if (p !== 'aichat') {
     var aip = document.getElementById('ai-fullpage');
@@ -924,10 +948,12 @@ function navigate(p, topicName) {
     if (bc) bc.style.display = '';
   }
   closeSidebar();
+  // Push to history (skip when going back)
+  if (!skipHistory && p !== undefined) pushNav(p);
   var bb = document.getElementById('backBtn');
-  if (bb) { if (p && p !== '') bb.classList.add('show'); else bb.classList.remove('show'); }
+  // Show back button if there's history to go back to
+  if (bb) { if (navStack.length > 1 || (p && p !== '')) bb.classList.add('show'); else bb.classList.remove('show'); }
   curPath = p; saveState();
-  // Track knowledge views
   if (p && p.indexOf('kn:') === 0) {
     var kn = p.substring(3);
     knowledgeViews[kn] = (knowledgeViews[kn] || 0) + 1;
@@ -937,16 +963,12 @@ function navigate(p, topicName) {
   if (!p && p !== '') return;
   var ct = document.getElementById('ct');
   if (!ct) return;
-  // Exit animation on current content
-  ct.classList.add('content-fade-out');
-  ct.addEventListener('animationend', function handler() {
-    ct.removeEventListener('animationend', handler);
-    // Replace with skeleton
-    ct.innerHTML = '<div style="padding:24px"><div class="skeleton-line title"></div><div class="skeleton-line"></div><div class="skeleton-line medium"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div><div class="skeleton-line medium"></div></div>';
-    ct.classList.remove('content-fade-out');
-    // Render content on next frame
-    requestAnimationFrame(function() {
-    try {
+  // Fast content swap with entrance animation
+  ct.style.opacity = '0';
+  ct.style.transform = 'translateY(6px)';
+  ct.style.transition = 'none';
+  // Render new content immediately
+  try {
     if (p === '') { showHome(); }
     else if (p === 'answerbank') { showAnswerBank(); }
     else if (p === 'stats') { showStats(); }
@@ -963,26 +985,30 @@ function navigate(p, topicName) {
     else if (p.indexOf('sub:') === 0) { showSub(p.substring(4)); }
     else if (topicName === 'qz') { showTopic(p, 'knQuestions'); }
     else { showTopic(p); }
-    } catch(err) {
-      var ct2 = document.getElementById('ct');
-      if (ct2) ct2.innerHTML = '<div style="padding:40px;text-align:center"><h3>⚠️ 页面加载出错</h3><p style="color:var(--r);margin:8px 0">' + err.message + '</p><button class="btn btn-gen" onclick="navigate(\'' + p + '\')">重试</button></div>';
-      console.error('Page render error:', err);
-    }
-    // Entrance animation
-    var content = document.getElementById('ct');
-    if (content) { content.classList.add('content-fade-in'); content.scrollTop = 0; }
-    // Stagger grid items on homepage
+  } catch(err) {
+    var ct2 = document.getElementById('ct');
+    if (ct2) ct2.innerHTML = '<div style="padding:40px;text-align:center"><h3>⚠️ 页面加载出错</h3><p style="color:var(--r);margin:8px 0">' + err.message + '</p><button class="btn btn-gen" onclick="navigate(\'' + p + '\')">重试</button></div>';
+    console.error('Page render error:', err);
+  }
+  ct.scrollTop = 0;
+  // Entrance animation
+  requestAnimationFrame(function() {
+    ct.style.transition = 'opacity .35s cubic-bezier(.23,1,.32,1), transform .35s cubic-bezier(.23,1,.32,1)';
+    ct.style.opacity = '1';
+    ct.style.transform = 'translateY(0)';
+    // Stagger grid items on homepage after entrance
     if (p === '' || p === 'home') {
       setTimeout(function() {
         var cards = document.querySelectorAll('#ct .gc, #ct .st, #ct .task');
         cards.forEach(function(el, i) {
           el.classList.add('stagger-in');
-          el.style.animationDelay = (i * 0.04) + 's';
+          el.style.animationDelay = (i * 0.03) + 's';
         });
-      }, 50);
+      }, 200);
     }
-    }); // end requestAnimationFrame
   });
+  // Remove inline transition after animation completes
+  setTimeout(function() { ct.style.transition = ''; }, 400);
 }
 
 // ===== PAGES =====
@@ -1361,7 +1387,8 @@ function closeAIPage() {
   if (ct) ct.style.display = "";
   var bc = document.getElementById("bc");
   if (bc) bc.style.display = "";
-  showHome();
+  clearNavStack();
+  navigate('', undefined, true);
 }
 
 function sendAIMessage() {
@@ -3258,6 +3285,8 @@ document.body.classList.add('sb-collapsed');
 buildNav();
 buildTfidf();
 showHome();
+// Push initial page to nav stack
+if (navStack.length === 0) pushNav('');
 // Stagger homepage items on initial load
 setTimeout(function() {
   var cards = document.querySelectorAll('#ct .gc, #ct .st, #ct .task');
