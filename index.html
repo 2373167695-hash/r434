@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-27 11:34 · modular -->
+<!-- v2.1 · 2026-06-27 11:41 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -40,7 +40,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 ::selection{background:rgba(94,92,230,.15);color:var(--t)}
 
 /* ===== SIDEBAR ===== */
-.sidebar{width:240px;background:var(--sidebar-bg);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));color:var(--ts);overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;border-right:.5px solid var(--bdr)}
+.sidebar{width:240px;background:var(--sidebar-bg);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));color:var(--ts);overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;border-right:.5px solid var(--bdr);transition:transform .3s cubic-bezier(.25,.1,.25,1);z-index:100}
+body.sb-collapsed .sidebar{position:fixed;inset:0 0 0 0;width:auto;transform:translateX(-100%);border-right:none}
+body.sb-collapsed .sidebar.open{transform:translateX(0);width:280px;border-right:.5px solid var(--bdr)}
+body.sb-collapsed .main{margin-left:0}
+/* sidebar overlay backdrop */
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.15);z-index:99;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .sidebar-hdr{padding:28px 18px 18px;text-align:center}
 .sidebar-hdr h2{color:var(--t);font-size:16px;font-weight:700;margin-bottom:2px;letter-spacing:-.2px}
 .sidebar-hdr p{font-size:11px;color:var(--ts);margin-top:4px}
@@ -73,6 +79,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 /* ===== MAIN ===== */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .topbar{background:rgba(255,255,255,.65);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));padding:0 28px;height:52px;border-bottom:.5px solid var(--bdr);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.menu-btn{display:block;background:none;border:none;border-radius:10px;padding:6px 10px;font-size:18px;cursor:pointer;color:var(--ts);min-width:32px;min-height:32px;transition:var(--transition)}
+.menu-btn:hover{background:rgba(0,0,0,.04);color:var(--t)}
 .back-btn{display:none;background:none;border:none;border-radius:10px;padding:6px 12px;font-size:15px;cursor:pointer;color:var(--ts);min-width:32px;min-height:32px;transition:var(--transition)}
 .back-btn:hover{background:rgba(0,0,0,.04);color:var(--t)}
 .back-btn.show{display:block}
@@ -359,7 +367,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;ba
   .gc{padding:14px;min-height:44px}.gc h4{font-size:14px}.qb{padding:0 8px 14px 8px}
 }
 @media(max-width:480px){
-  .sidebar{position:fixed;left:-280px;top:0;bottom:0;width:280px;z-index:1000;transition:left .3s cubic-bezier(.25,.1,.25,1);box-shadow:0 0 40px rgba(0,0,0,.15)}
+  .sidebar.open{width:280px}
   .main{margin-left:0!important}
   .topbar{gap:6px;padding:8px 12px}.topbar .bc{font-size:12px}.content{padding:10px}
   .hero h1{font-size:17px;line-height:1.3}.hero .desc{font-size:11px}
@@ -373,7 +381,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;ba
   .quiz-box{padding:14px;border-radius:var(--radius)}.quiz-box h3{font-size:14px}
   table{display:block;overflow-x:auto;font-size:11px}
   textarea{font-size:16px!important}input{font-size:16px!important}
-  .loading{padding:40px 20px}.mobile-menu-btn{display:block}
+  .loading{padding:40px 20px}
 }
 </style>
 
@@ -473,8 +481,9 @@ window.addEventListener('unhandledrejection', function(e) {
 </div>
 <div class="sidebar-btm"><button class="active" data-m="learn">📚 学习</button><button data-m="quiz">🎲 测验</button></div>
 </div>
+<div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
 <div class="main">
-<div class="topbar"><button class="back-btn" id="backBtn" onclick="goBack()" title="返回">←</button><div class="bc" id="bc">首页</div><input type="text" id="gs" placeholder="搜索..." onkeydown="if(event.key==='Enter')doSearch()"></div>
+<div class="topbar"><button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" title="菜单">☰</button><button class="back-btn" id="backBtn" onclick="goBack()" title="返回">←</button><div class="bc" id="bc">首页</div><input type="text" id="gs" placeholder="搜索..." onkeydown="if(event.key==='Enter')doSearch()"></div>
 <div class="content" id="ct"><div class="loading"><div class="spinner"></div><p style="margin-top:12px">加载数据中...</p></div></div>
 </div>
 <script>
@@ -813,7 +822,20 @@ function setActive(p) {
 function goBack() {
   var bb = document.getElementById('backBtn');
   if (curPath && curPath !== '') { navigate(''); }
-  else { var sb = document.querySelector('.sidebar'); if (sb) sb.classList.remove('open'); }
+  else { closeSidebar(); }
+}
+function toggleSidebar() {
+  var sb = document.querySelector('.sidebar');
+  if (!sb) return;
+  if (sb.classList.contains('open')) { closeSidebar(); } else { openSidebar(); }
+}
+function openSidebar() {
+  var sb = document.querySelector('.sidebar');
+  if (sb) sb.classList.add('open');
+}
+function closeSidebar() {
+  var sb = document.querySelector('.sidebar');
+  if (sb) sb.classList.remove('open');
 }
 function navigate(p, topicName) {
   // Clean up AI fullpage if navigating away from it
@@ -825,6 +847,7 @@ function navigate(p, topicName) {
     var bc = document.getElementById('bc');
     if (bc) bc.style.display = '';
   }
+  closeSidebar();
   var bb = document.getElementById('backBtn');
   if (bb) { if (p && p !== '') bb.classList.add('show'); else bb.classList.remove('show'); }
   curPath = p; saveState();
@@ -3164,6 +3187,7 @@ if (token) {
   // Show login, hide main content until logged in
   document.getElementById('loginOverlay').style.display = 'flex';
 }
+document.body.classList.add('sb-collapsed');
 buildNav();
 buildTfidf();
 showHome();
