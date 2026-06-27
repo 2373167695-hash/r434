@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-27 12:03 · modular -->
+<!-- v2.1 · 2026-06-27 12:13 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -15,27 +15,27 @@
 <style>
 /* ===== iOS 26 LIQUID GLASS DESIGN ===== */
 :root{
-  --r:#ff453a;--bg:#f2f2f7;--card:rgba(255,255,255,.68);--t:#1d1d1f;--ts:#86868b;--bdr:rgba(0,0,0,.08);
+  --r:#ff453a;--bg:#f2f2f7;--card:rgba(255,255,255,.42);--t:#1d1d1f;--ts:#86868b;--bdr:rgba(255,255,255,.18);
   --bl:#007aff;--gn:#30d158;--or:#ff9f0a;--pu:#5e5ce6;
   --sidebar-bg:rgba(255,255,255,.32);--sidebar-hover:rgba(0,0,0,.03);
-  --sh:0 1px 4px rgba(0,0,0,.06),0 0 0 .5px rgba(0,0,0,.04);--panel-bg:rgba(0,0,0,.03);
+  --sh:0 2px 8px rgba(0,0,0,.04),0 0 0 .5px rgba(255,255,255,.35);--panel-bg:rgba(0,0,0,.03);
   --amber-bg:rgba(255,159,10,.08);--amber-border:rgba(255,159,10,.15);--amber-text:#78350f;
-  --shadow-md:0 8px 32px rgba(0,0,0,.08);--shadow-lg:0 16px 48px rgba(0,0,0,.12);
+  --shadow-md:0 8px 32px rgba(0,0,0,.06),0 0 0 .5px rgba(255,255,255,.3);--shadow-lg:0 16px 48px rgba(0,0,0,.1);
   --radius:18px;--radius-lg:24px;
   --transition:all .3s cubic-bezier(.25,.1,.25,1);
-  --glass-blur:24px;
-  --glass-border:rgba(255,255,255,.5);
-  --glass-highlight:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
+  --glass-blur:32px;
+  --glass-border:rgba(255,255,255,.45);
+  --glass-highlight:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--t);line-height:1.5;font-size:14px;display:flex;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;position:relative}
 /* Liquid Glass Background Orbs */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background:
-  radial-gradient(ellipse 500px 500px at 10% -10%,rgba(224,212,245,.45) 0%,transparent 70%),
-  radial-gradient(ellipse 400px 400px at 90% 30%,rgba(196,224,249,.4) 0%,transparent 70%),
-  radial-gradient(ellipse 450px 450px at 60% 110%,rgba(200,240,212,.4) 0%,transparent 70%),
-  radial-gradient(ellipse 350px 350px at 5% 50%,rgba(253,228,200,.35) 0%,transparent 70%),
-  radial-gradient(ellipse 300px 300px at 85% 75%,rgba(245,216,232,.35) 0%,transparent 70%)
+  radial-gradient(ellipse 600px 600px at 8% -12%,rgba(210,190,245,.55) 0%,transparent 65%),
+  radial-gradient(ellipse 500px 500px at 92% 25%,rgba(180,210,250,.5) 0%,transparent 65%),
+  radial-gradient(ellipse 550px 550px at 55% 115%,rgba(180,235,200,.5) 0%,transparent 65%),
+  radial-gradient(ellipse 400px 400px at 2% 55%,rgba(255,220,180,.45) 0%,transparent 65%),
+  radial-gradient(ellipse 380px 380px at 88% 78%,rgba(240,200,220,.45) 0%,transparent 65%)
 ;}
 ::selection{background:rgba(94,92,230,.15);color:var(--t)}
 
@@ -141,7 +141,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .sec-hd a,.sec-hd span{font-size:12px;color:var(--pu);cursor:pointer;font-weight:500;text-decoration:none;transition:var(--transition)}
 .sec-hd a:hover{opacity:.7}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-top:0}
-.gc{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--sh);cursor:pointer;transition:var(--transition);border:.5px solid var(--glass-border);display:flex;gap:14px;align-items:flex-start;position:relative;overflow:hidden}
+.gc{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--sh);cursor:pointer;transition:var(--transition);border:.5px solid var(--glass-border);display:flex;gap:14px;align-items:flex-start;position:relative;overflow:hidden}
 .gc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-highlight);pointer-events:none}
 .gc:hover{border-color:rgba(94,92,230,.2);box-shadow:var(--shadow-md);transform:translateY(-3px);background:rgba(255,255,255,.78)}
 .gc .ico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-top:2px}
@@ -160,7 +160,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .rel{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
 .rt{padding:6px 16px;border-radius:20px;background:rgba(0,0,0,.03);font-size:12px;cursor:pointer;transition:var(--transition);color:#555;border:.5px solid rgba(0,0,0,.06)}
 .rt:hover{background:var(--pu);color:#fff;border-color:transparent}
-.pcard{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:var(--radius-lg);box-shadow:var(--sh);margin-bottom:16px;overflow:hidden;border:.5px solid var(--glass-border);position:relative}
+.pcard{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);border-radius:var(--radius-lg);box-shadow:var(--sh);margin-bottom:16px;overflow:hidden;border:.5px solid var(--glass-border);position:relative}
 .pcard::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-highlight);pointer-events:none;z-index:1}
 .pcard-hdr{padding:18px 24px;border-bottom:.5px solid var(--bdr)}
 .pcard-hdr h3{font-size:16px;font-weight:700;margin:0}
@@ -207,7 +207,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .kn-content{display:block}.kn-content.hidden{display:none}
 
 /* ===== QUESTIONS ===== */
-.qc{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:var(--radius);box-shadow:var(--sh);margin-bottom:6px;overflow:hidden;border:.5px solid var(--glass-border);position:relative}
+.qc{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);border-radius:var(--radius);box-shadow:var(--sh);margin-bottom:6px;overflow:hidden;border:.5px solid var(--glass-border);position:relative}
 .qc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-highlight);pointer-events:none;z-index:1}
 .qh{padding:14px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:var(--transition)}
 .qh:hover{background:rgba(0,0,0,.015)}
@@ -246,24 +246,82 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .chat-msg .chat-dot:nth-child(2){animation-delay:.2s}.chat-msg .chat-dot:nth-child(3){animation-delay:.4s}
 @keyframes dotPulse{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1.2)}}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== AI CHAT FULL-PAGE ===== */
+.ai-chat-wrap{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;z-index:100;background:#f2f2f7;overflow:hidden}
+.ai-chat-wrap::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;background:
+  radial-gradient(ellipse 500px 500px at 10% -10%,rgba(210,190,245,.4) 0%,transparent 65%),
+  radial-gradient(ellipse 400px 400px at 90% 25%,rgba(180,210,250,.35) 0%,transparent 65%),
+  radial-gradient(ellipse 450px 450px at 55% 115%,rgba(180,235,200,.35) 0%,transparent 65%)
+}
+.ai-chat-hdr{position:relative;z-index:1;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;
+  background:rgba(255,255,255,.35);backdrop-filter:blur(40px) saturate(1.4);-webkit-backdrop-filter:blur(40px) saturate(1.4);
+  border-bottom:.5px solid rgba(255,255,255,.3)}
+.ai-chat-hdr h3{font-size:17px;font-weight:700;color:var(--t)}
+.ai-chat-hdr .sub{font-size:11px;color:var(--ts);margin-left:10px}
+.ai-chat-hdr-btns{display:flex;gap:6px}
+.ai-chat-hdr-btn{padding:6px 14px;background:rgba(255,255,255,.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:.5px solid rgba(255,255,255,.4);border-radius:12px;font-size:12px;cursor:pointer;color:var(--ts);font-family:inherit;transition:var(--transition)}
+.ai-chat-hdr-btn:hover{background:rgba(255,255,255,.6);color:var(--t)}
+.ai-chat-body{flex:1;overflow-y:auto;padding:24px 24px 8px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1}
+.ai-chat-body::-webkit-scrollbar{width:5px}.ai-chat-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08);border-radius:3px}
+.ai-welcome{background:rgba(255,255,255,.45);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  padding:20px 24px;border-radius:18px;font-size:14px;line-height:1.8;max-width:78%;align-self:flex-start;
+  border:.5px solid rgba(255,255,255,.4);position:relative;overflow:hidden}
+.ai-welcome::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-highlight);pointer-events:none}
+.ai-welcome strong{font-size:15px;display:block;margin-bottom:6px}
+.ai-msg{max-width:78%;font-size:14px;line-height:1.8;word-break:break-word;position:relative;overflow:hidden}
+.ai-msg-user{align-self:flex-end;background:linear-gradient(135deg,#5e5ce6,#007aff);color:#fff;
+  padding:14px 20px;border-radius:18px 18px 4px 18px;margin-left:auto;box-shadow:0 2px 12px rgba(94,92,230,.15)}
+.ai-msg-user::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);pointer-events:none}
+.ai-msg-bot{align-self:flex-start;background:rgba(255,255,255,.5);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  padding:18px 22px;border-radius:18px 18px 18px 4px;
+  border:.5px solid rgba(255,255,255,.4);box-shadow:0 2px 12px rgba(0,0,0,.04)}
+.ai-msg-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-highlight);pointer-events:none}
+.ai-msg-bot p{margin:4px 0}.ai-msg-bot strong{color:var(--t)}
+.ai-msg-bot h1,.ai-msg-bot h2,.ai-msg-bot h3,.ai-msg-bot h4{margin:8px 0 4px}
+.ai-msg-bot ul,.ai-msg-bot ol{padding-left:20px;margin:6px 0}
+.ai-msg-bot code{background:rgba(0,0,0,.05);padding:1px 5px;border-radius:4px;font-size:12px}
+.ai-msg-bot pre{background:rgba(0,0,0,.04);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:8px 0}
+.ai-msg-bot pre code{background:none;padding:0}
+.ai-msg-err{align-self:flex-start;color:var(--r);font-size:13px;padding:12px 18px;background:rgba(255,69,58,.06);
+  border-radius:14px;border:.5px solid rgba(255,69,58,.12)}
+.ai-loading{display:flex;align-items:center;gap:10px;padding:14px 20px;background:rgba(255,255,255,.4);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:18px 18px 18px 4px;
+  border:.5px solid rgba(255,255,255,.3);font-size:13px;color:var(--ts);align-self:flex-start;max-width:200px}
+.ai-loading .ai-dot{width:7px;height:7px;border-radius:50%;background:var(--pu);display:inline-block;margin:0 2px;animation:aiBounce 1.4s infinite ease-in-out}
+.ai-loading .ai-dot:nth-child(1){animation-delay:0s}.ai-loading .ai-dot:nth-child(2){animation-delay:.2s}.ai-loading .ai-dot:nth-child(3){animation-delay:.4s}
+.ai-chat-input-bar{position:relative;z-index:1;padding:16px 24px 20px;display:flex;gap:12px;align-items:flex-end;
+  background:rgba(255,255,255,.3);backdrop-filter:blur(40px) saturate(1.4);-webkit-backdrop-filter:blur(40px) saturate(1.4);
+  border-top:.5px solid rgba(255,255,255,.3)}
+.ai-chat-textarea{flex:1;padding:12px 18px;border:.5px solid rgba(255,255,255,.35);border-radius:16px;
+  font-size:14px;outline:none;background:rgba(255,255,255,.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  resize:none;font-family:inherit;min-height:44px;max-height:120px;color:var(--t);transition:var(--transition)}
+.ai-chat-textarea::placeholder{color:var(--ts)}
+.ai-chat-textarea:focus{border-color:rgba(94,92,230,.3);box-shadow:0 0 0 3px rgba(94,92,230,.1)}
+.ai-chat-send{padding:12px 24px;background:linear-gradient(135deg,#5e5ce6,#007aff);color:#fff;border:none;
+  border-radius:16px;font-size:14px;font-weight:600;cursor:pointer;height:44px;white-space:nowrap;font-family:inherit;
+  transition:var(--transition);box-shadow:0 2px 12px rgba(94,92,230,.2)}
+.ai-chat-send:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(94,92,230,.3)}
+.ai-chat-send:active{transform:scale(.97)}
 .loading{text-align:center;padding:60px;color:var(--ts)}
 .loading .spinner{display:inline-block;width:28px;height:28px;border:3px solid rgba(0,0,0,.05);border-top-color:var(--pu);border-radius:50%;animation:spin .8s linear infinite}
 
 /* ===== DASHBOARD & MACRO ===== */
 .dash-hero{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px}
-.dash-metric{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:var(--radius);padding:16px 18px;border:.5px solid var(--glass-border);transition:var(--transition);box-shadow:var(--sh)}
+.dash-metric{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);border-radius:var(--radius);padding:16px 18px;border:.5px solid var(--glass-border);transition:var(--transition);box-shadow:var(--sh)}
 .dash-metric:hover{border-color:rgba(94,92,230,.2);box-shadow:var(--shadow-md);transform:translateY(-2px)}
 .dash-metric .label{font-size:11px;color:var(--ts);margin-bottom:6px}
 .dash-metric .value{font-size:22px;font-weight:800;color:var(--t)}
 .dash-metric .change{font-size:11px;margin-top:4px}
 .dash-charts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-.dash-chart-card{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:var(--radius);padding:18px;border:.5px solid var(--glass-border);box-shadow:var(--sh)}
+.dash-chart-card{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);border-radius:var(--radius);padding:18px;border:.5px solid var(--glass-border);box-shadow:var(--sh)}
 .dash-chart-card h4{font-size:13px;font-weight:700;margin-bottom:8px}
 .dash-chart-card .subtitle{font-size:11px;color:var(--ts)}
 .macro-section-header{margin:24px 0 14px;padding-bottom:10px;border-bottom:2px solid rgba(0,0,0,.04);display:flex;align-items:center;justify-content:space-between}
 .macro-section-header h3{font-size:16px;font-weight:700}
 /* ===== PROFESSORS ===== */
-.prof-card{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:var(--radius-lg);border:.5px solid var(--glass-border);overflow:hidden;margin-bottom:16px;transition:var(--transition);box-shadow:var(--sh);position:relative}
+.prof-card{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);border-radius:var(--radius-lg);border:.5px solid var(--glass-border);overflow:hidden;margin-bottom:16px;transition:var(--transition);box-shadow:var(--sh);position:relative}
 .prof-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-highlight);pointer-events:none;z-index:1}
 .prof-card:hover{border-color:rgba(94,92,230,.2);box-shadow:var(--shadow-md)}
 .prof-hdr{padding:18px 22px;border-bottom:.5px solid var(--bdr)}
@@ -281,7 +339,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .dash-charts canvas{max-height:250px}
 
 /* ===== ACCORDION ===== */
-.kn-accordion{margin:0 30px 6px;border:.5px solid var(--glass-border);border-radius:var(--radius);overflow:hidden;background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--sh);position:relative}
+.kn-accordion{margin:0 30px 6px;border:.5px solid var(--glass-border);border-radius:var(--radius);overflow:hidden;background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);box-shadow:var(--sh);position:relative}
 .kn-accordion::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-highlight);pointer-events:none;z-index:1}
 .kn-accordion.open .kn-acc-body{display:block}
 .kn-acc-hdr{padding:14px 18px;cursor:pointer;font-size:14px;font-weight:600;color:var(--t);display:flex;align-items:center;gap:8px;user-select:none;transition:var(--transition)}
@@ -296,7 +354,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .kn-acc-body ol li{padding:4px 0;list-style-type:decimal;font-size:13px;border-bottom:.5px solid rgba(0,0,0,.04)}
 
 /* ===== PREDICTIONS & HOT TOPICS ===== */
-.know-pred-card,.hot-topic-card{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:var(--radius-lg);box-shadow:var(--sh);margin-bottom:18px;overflow:hidden;border:.5px solid var(--glass-border);transition:var(--transition);position:relative}
+.know-pred-card,.hot-topic-card{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);border-radius:var(--radius-lg);box-shadow:var(--sh);margin-bottom:18px;overflow:hidden;border:.5px solid var(--glass-border);transition:var(--transition);position:relative}
 .know-pred-card::before,.hot-topic-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-highlight);pointer-events:none;z-index:1}
 .know-pred-card:hover,.hot-topic-card:hover{box-shadow:var(--shadow-lg)}
 .know-pred-hdr,.hot-topic-hdr{padding:18px 24px;border-bottom:.5px solid var(--bdr);display:flex;align-items:flex-start;gap:12px}
@@ -323,7 +381,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 @keyframes aiFlip{0%,100%{transform:rotate(0deg)}50%{transform:rotate(180deg)}}
 
 /* ===== MACRO DAILY ===== */
-.macro-card{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:var(--radius-lg);border:.5px solid var(--glass-border);overflow:hidden;margin-bottom:16px;box-shadow:var(--sh);position:relative}
+.macro-card{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);border-radius:var(--radius-lg);border:.5px solid var(--glass-border);overflow:hidden;margin-bottom:16px;box-shadow:var(--sh);position:relative}
 .macro-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-highlight);pointer-events:none;z-index:1}
 .macro-card-hdr{padding:16px 22px;border-bottom:.5px solid var(--bdr)}
 .macro-card-hdr h3{font-size:16px;font-weight:700}
@@ -1235,90 +1293,55 @@ function renderMarkdown(text) {
 }
 
 function showAI() {
-  // Hide breadcrumb and sidebar for full-page experience
   var bc = document.getElementById("bc");
   if (bc) bc.style.display = "none";
-  
   var h = '';
-  
-  // Full-page chat container
-  h += '<div id="ai-chat-container" style="position:fixed;top:0;left:260px;right:0;bottom:0;background:var(--bg);display:flex;flex-direction:column;z-index:100">';
-  
-  // Chat header
-  h += '<div style="padding:16px 24px;border-bottom:1px solid var(--bdr);background:var(--card);display:flex;justify-content:space-between;align-items:center">';
-  h += '<div style="display:flex;align-items:center;gap:12px">';
-  h += '<h3 style="font-size:18px;font-weight:700">💬 AI 备考助手</h3>';
-  h += '<span style="font-size:12px;color:var(--ts)">MiMo v2.5 · 1M上下文 · ' + DATA.length + '道真题</span>';
-  h += '</div>';
-  h += '<div style="display:flex;gap:8px">';
-  h += '<button onclick="clearAIChat()" style="padding:6px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:6px;font-size:12px;cursor:pointer;color:var(--ts)">清空历史</button>';
-  h += '<button onclick="closeAIPage()" style="padding:6px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:6px;font-size:12px;cursor:pointer;color:var(--ts)">✕ 关闭</button>';
-  h += '</div>';
-  h += '</div>';
-  
-  // Chat messages area
-  h += '<div id="ai-chat-body" style="flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px">';
-  
-  // Welcome message
-  h += '<div style="background:#f5f3ef;padding:20px 24px;border-radius:12px;font-size:15px;line-height:1.8;max-width:80%">';
-  h += '<strong>👋 你好！我是人大434备考AI助手。</strong><br><br>';
-  h += '我可以帮你：<br>';
-  h += '• 解答国际贸易、国际金融、国际商务管理等问题<br>';
-  h += '• 讲解知识点，对比相似理论<br>';
-  h += '• 生成模拟题和参考答案<br>';
+  h += '<div class="ai-chat-wrap">';
+  h += '<div class="ai-chat-hdr"><div style="display:flex;align-items:center">';
+  h += '<h3>💬 AI 备考助手</h3><span class="sub">MiMo v2.5 · ' + DATA.length + '道真题</span></div>';
+  h += '<div class="ai-chat-hdr-btns">';
+  h += '<button class="ai-chat-hdr-btn" onclick="clearAIChat()">清空历史</button>';
+  h += '<button class="ai-chat-hdr-btn" onclick="closeAIPage()">✕ 关闭</button>';
+  h += '</div></div>';
+  h += '<div id="ai-chat-body" class="ai-chat-body">';
+  h += '<div class="ai-welcome"><strong>👋 你好！我是人大434备考AI助手。</strong><br>';
+  h += '我可以帮你：<br>• 解答国际贸易、国际金融、国际商务管理等问题<br>';
+  h += '• 讲解知识点，对比相似理论<br>• 生成模拟题和参考答案<br>';
   h += '• 分析宏观经济热点与考试关联<br><br>';
   h += '试试问我：比较优势理论和H-O理论有什么区别？</div>';
-  
-  // Load chat history
   if (chatHistory.length > 0) {
     chatHistory.forEach(function(msg) {
       if (msg.role === 'assistant') {
-        h += '<div style="background:#f5f3ef;padding:20px 24px;border-radius:12px;font-size:15px;line-height:1.8;max-width:80%">' + renderMarkdown(msg.content) + '</div>';
+        h += '<div class="ai-msg ai-msg-bot">' + renderMarkdown(msg.content) + '</div>';
       } else {
-        h += '<div style="background:var(--pu);color:#fff;padding:20px 24px;border-radius:12px;font-size:15px;line-height:1.8;align-self:flex-end;max-width:80%">' + msg.content + '</div>';
+        h += '<div class="ai-msg ai-msg-user">' + msg.content + '</div>';
       }
     });
   }
-  
   h += '</div>';
-  
-  // Input area
-  h += '<div style="padding:20px 24px;border-top:1px solid var(--bdr);background:var(--card);display:flex;gap:16px;align-items:flex-end">';
-  h += '<textarea id="ai-chat-input" placeholder="输入你的问题... (Enter发送，Shift+Enter换行)" rows="2" style="flex:1;padding:14px 18px;border:1px solid var(--bdr);border-radius:12px;font-size:15px;outline:none;background:var(--bg);resize:none;font-family:inherit;min-height:48px;max-height:120px" onkeydown="if(event.key===\'Enter\' && !event.shiftKey){event.preventDefault();sendAIMessage()}"></textarea>';
-  h += '<button onclick="sendAIMessage()" style="padding:14px 28px;background:var(--pu);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;height:48px">发送</button>';
-  h += '</div>';
-  
-  h += '</div>';
-  
-  // Hide the main content area since we're using fixed positioning
+  h += '<div class="ai-chat-input-bar">';
+  h += '<textarea id="ai-chat-input" class="ai-chat-textarea" placeholder="输入你的问题... (Enter发送，Shift+Enter换行)" rows="2" onkeydown="if(event.key===\'Enter\' && !event.shiftKey){event.preventDefault();sendAIMessage()}"></textarea>';
+  h += '<button class="ai-chat-send" onclick="sendAIMessage()">发送</button>';
+  h += '</div></div>';
   var ct = document.getElementById("ct");
   if (ct) ct.style.display = "none";
-  
-  // Add the full-page chat to body
   var existing = document.getElementById('ai-fullpage');
   if (existing) existing.remove();
   var div = document.createElement('div');
   div.id = 'ai-fullpage';
   div.innerHTML = h;
   document.body.appendChild(div);
-  
-  // Scroll to bottom
   var chatBody = document.getElementById('ai-chat-body');
   if (chatBody) chatBody.scrollTop = chatBody.scrollHeight;
 }
 
 function closeAIPage() {
-  // Remove the full-page chat
   var existing = document.getElementById('ai-fullpage');
   if (existing) existing.remove();
-  
-  // Show the main content area again
   var ct = document.getElementById("ct");
   if (ct) ct.style.display = "";
   var bc = document.getElementById("bc");
   if (bc) bc.style.display = "";
-  
-  // Navigate back to home
   showHome();
 }
 
@@ -1328,31 +1351,17 @@ function sendAIMessage() {
   var q = input.value.trim();
   if (!q) return;
   input.value = '';
-  
   var chatBody = document.getElementById('ai-chat-body');
   if (!chatBody) return;
-  
-  // Add user message
-  chatBody.innerHTML += '<div style="background:var(--pu);color:#fff;padding:16px 20px;border-radius:12px;font-size:14px;line-height:1.8;align-self:flex-end;max-width:80%">' + q + '</div>';
-  
-  // Add loading indicator
+  chatBody.innerHTML += '<div class="ai-msg ai-msg-user">' + q + '</div>';
   var loadingId = 'ai-loading-' + Date.now();
-  chatBody.innerHTML += '<div id="' + loadingId + '" style="background:#f5f3ef;padding:16px 20px;border-radius:12px;font-size:14px;color:var(--ts)"><span class="chat-dot"></span><span class="chat-dot"></span><span class="chat-dot"></span> 思考中...</div>';
+  chatBody.innerHTML += '<div id="' + loadingId + '" class="ai-loading"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span> 思考中...</div>';
   chatBody.scrollTop = chatBody.scrollHeight;
-  
-  // Add to history
   chatHistory.push({role: 'user', content: q});
-  
-  // Build context
   var ctx = buildAIContext(q);
   var sys = RUC434_STYLE + "\n你是人大434国际商务考研AI助手。你的数据库中已包含完整的历年真题和标准答案，你随时可以引用任何一道真题。请严格遵循以上写作风格，参考数据库中的真题答案、知识点和热点素材回答问题。公式请用$...$包裹。\n" + ctx + "\n\n要求：必须参考数据库中的真实真题和答案来回答；贴合人大434风格、结构化、分点作答、术语中英文对照、结尾有考点提示。";
-  
   var msgs = [{role: 'system', content: sys}];
-  chatHistory.slice(-10).forEach(function(h) {
-    msgs.push({role: h.role, content: h.content});
-  });
-  
-  // Call API
+  chatHistory.slice(-10).forEach(function(h) { msgs.push({role: h.role, content: h.content}); });
   fetch(DS_URL, {
     method: 'POST',
     headers: {Authorization: 'Bearer ' + getAPIKey(), 'Content-Type': 'application/json'},
@@ -1364,8 +1373,7 @@ function sendAIMessage() {
     var b = '', t = '', d = new TextDecoder();
     var responseId = 'ai-response-' + Date.now();
     var loadingEl = document.getElementById(loadingId);
-    if (loadingEl) loadingEl.id = responseId;
-    
+    if (loadingEl) { loadingEl.id = responseId; loadingEl.className = 'ai-msg ai-msg-bot'; loadingEl.innerHTML = ''; }
     function n() {
       rd.read().then(function(r) {
         if (r.done) {
@@ -1403,7 +1411,7 @@ function sendAIMessage() {
     n();
   }).catch(function(err) {
     var loadingEl = document.getElementById(loadingId);
-    if (loadingEl) loadingEl.innerHTML = '<span style="color:var(--r)">请求失败：' + err.message + '</span>';
+    if (loadingEl) loadingEl.innerHTML = '<div class="ai-msg-err">请求失败：' + err.message + '</div>';
   });
 }
 
