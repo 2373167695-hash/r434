@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-27 01:03 · modular -->
+<!-- v2.1 · 2026-06-27 01:49 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -802,6 +802,7 @@ function navigate(p, topicName) {
   }
   // Render actual content on next frame so skeleton is visible
   requestAnimationFrame(function() {
+  try {
   if (p === '') { showHome(); }
   else if (p === 'answerbank') { showAnswerBank(); }
   else if (p === 'stats') { showStats(); }
@@ -818,6 +819,11 @@ function navigate(p, topicName) {
   else if (p.indexOf('sub:') === 0) { showSub(p.substring(4)); }
   else if (topicName === 'qz') { showTopic(p, 'knQuestions'); }
   else { showTopic(p); }
+  } catch(err) {
+    var ct2 = document.getElementById('ct');
+    if (ct2) ct2.innerHTML = '<div style="padding:40px;text-align:center"><h3>⚠️ 页面加载出错</h3><p style="color:var(--r);margin:8px 0">' + err.message + '</p><button class="btn btn-gen" onclick="navigate(\'' + p + '\')">重试</button></div>';
+    console.error('Page render error:', err);
+  }
   // Add fade-in animation
   var content = document.getElementById('ct');
   if (content) { content.classList.remove('content-fade-in'); void content.offsetWidth; content.classList.add('content-fade-in'); }
