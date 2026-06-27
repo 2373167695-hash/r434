@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-27 13:11 · modular -->
+<!-- v2.1 · 2026-06-27 13:22 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -40,7 +40,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 ::selection{background:rgba(94,92,230,.15);color:var(--t)}
 
 /* ===== SIDEBAR ===== */
-.sidebar{width:240px;background:var(--sidebar-bg);backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);color:var(--ts);overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;border-right:.5px solid rgba(255,255,255,.3);transition:transform .2s ease-out;z-index:100;position:relative;scroll-behavior:smooth}
+.sidebar{width:240px;background:var(--sidebar-bg);backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);color:var(--ts);overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;border-right:.5px solid rgba(255,255,255,.3);z-index:100;position:relative;scroll-behavior:smooth}
 body.sb-collapsed .sidebar{position:fixed;inset:0 0 0 0;width:auto;transform:translateX(-100%);border-right:none}
 body.sb-collapsed .sidebar.open{transform:translateX(0);width:280px;border-right:.5px solid rgba(255,255,255,.3);box-shadow:8px 0 40px rgba(0,0,0,.1)}
 body.sb-collapsed .main{margin-left:0}
@@ -959,6 +959,7 @@ function navigate(p, topicName, skipHistory) {
     var bc = document.getElementById('bc');
     if (bc) bc.style.display = '';
   }
+  closeSidebar();
   // Push to history (skip when going back)
   if (!skipHistory && p !== undefined) pushNav(p);
   var bb = document.getElementById('backBtn');
@@ -974,9 +975,6 @@ function navigate(p, topicName, skipHistory) {
   if (!p && p !== '') return;
   var ct = document.getElementById('ct');
   if (!ct) return;
-  // Fast content swap with entrance animation
-  ct.style.transition = 'none';
-  ct.style.opacity = '0';
   // Render new content immediately
   try {
     if (p === '') { showHome(); }
@@ -1002,28 +1000,8 @@ function navigate(p, topicName, skipHistory) {
     console.error('Page render error:', err);
   }
   ct.scrollTop = 0;
-  // Close sidebar AFTER content loads, so it doesn't feel like a slam
-  setTimeout(function() { closeSidebar(); }, 80);
-  // Force commit opacity:0 to layout, then animate manually
-  getComputedStyle(ct).opacity;
-  var _start = performance.now();
-  function _tick(now) {
-    var p = Math.min((now - _start) / 500, 1);
-    // ease-out quad: 1 - (1-t)^2
-    ct.style.opacity = 1 - Math.pow(1 - p, 2);
-    if (p < 1) { requestAnimationFrame(_tick); }
-    else { ct.style.opacity = ''; }
-  }
-  requestAnimationFrame(_tick);
-  // Stagger homepage items
-  if (p === '' || p === 'home') {
-    setTimeout(function() {
-      var cards = document.querySelectorAll('#ct .gc, #ct .st, #ct .task');
-      cards.forEach(function(el, i) {
-        el.style.animation = 'staggerFade .5s ease-out ' + (i * 0.04) + 's both';
-      });
-    }, 300);
-  }
+  ct.style.opacity = '';
+  ct.style.transition = '';
 }
 
 // ===== PAGES =====
