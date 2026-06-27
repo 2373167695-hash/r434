@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-27 12:48 · modular -->
+<!-- v2.1 · 2026-06-27 12:52 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -937,6 +937,22 @@ function closeSidebar() {
   var sb = document.querySelector('.sidebar');
   if (sb) sb.classList.remove('open');
 }
+function navigateByKnowledge(name) {
+  if (!name) return;
+  var key = name;
+  // Try exact key match first
+  if (!KNOWLEDGE[key]) {
+    for (var k in KNOWLEDGE) {
+      if (k === name || k.indexOf(name) === 0 || name.indexOf(k) === 0) { key = k; break; }
+    }
+  }
+  if (KNOWLEDGE[key]) {
+    navigate('kn:' + key, name);
+  }
+}
+function showExamYear(year) {
+  navigate('year:' + year, String(year));
+}
 function navigate(p, topicName, skipHistory) {
   // Clean up AI fullpage if navigating away from it
   if (p !== 'aichat') {
@@ -981,6 +997,7 @@ function navigate(p, topicName, skipHistory) {
     else if (p === 'macro') { showMacro(); }
     else if (p === 'predictions') { showPredictions(); }
     else if (p === 'professors') { showProfessors(); }
+    else if (p.indexOf('year:') === 0) { doShowExamYear(parseInt(p.substring(5))); }
     else if (p.indexOf('cat:') === 0) { showCat(p.substring(4)); }
     else if (p.indexOf('sub:') === 0) { showSub(p.substring(4)); }
     else if (topicName === 'qz') { showTopic(p, 'knQuestions'); }
@@ -2574,7 +2591,7 @@ function showStats() {
 
 
 
-function showExamYear(year) {
+function doShowExamYear(year) {
   var qs = DATA.filter(function(q) { return q.year == year; });
   document.getElementById('bc').innerHTML = '<span>📝 ' + year + '年真题 (' + qs.length + '道)</span>';
   var h = '<div class="hero"><h1>📝 ' + year + '年真题</h1><div class="desc">共 ' + qs.length + ' 道题</div></div>';
