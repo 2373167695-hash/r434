@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-28 02:54 · modular -->
+<!-- v2.1 · 2026-06-28 02:57 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -22,14 +22,14 @@
 :root{
   --r:#ff453a;--bg:#f2f2f7;--card:rgba(255,255,255,.42);--t:#1d1d1f;--ts:#86868b;--bdr:rgba(255,255,255,.18);
   --bl:#007aff;--gn:#30d158;--or:#ff9f0a;--pu:#5e5ce6;
-  --sidebar-bg:rgba(255,255,255,.25);--sidebar-hover:rgba(0,0,0,.03);
-  --sh:0 4px 16px rgba(31,38,135,.06),inset 0 1px 0 rgba(255,255,255,.7);--panel-bg:rgba(0,0,0,.03);
+  --sidebar-bg:rgba(255,255,255,.15);--sidebar-hover:rgba(0,0,0,.03);
+  --sh:0 8px 24px rgba(31,38,135,.12),inset 0 1px 1px rgba(255,255,255,.8);--panel-bg:rgba(0,0,0,.03);
   --amber-bg:rgba(255,159,10,.08);--amber-border:rgba(255,159,10,.15);--amber-text:#78350f;
   --shadow-md:0 8px 32px rgba(31,38,135,.1),inset 0 1px 0 rgba(255,255,255,.6);--shadow-lg:0 16px 48px rgba(0,0,0,.1);
   --radius:18px;--radius-lg:24px;
   --transition:all .3s cubic-bezier(.25,.1,.25,1);
-  --glass-blur:blur(20px) saturate(200%) brightness(1.05);
-  --glass-border:rgba(255,255,255,.5);
+  --glass-blur:blur(14px) saturate(300%) brightness(1.08);
+  --glass-border:rgba(255,255,255,.7);
   --glass-highlight:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,.05) 40%,transparent 70%);
   --glass-top-line:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
 }
@@ -37,12 +37,12 @@
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--t);line-height:1.5;font-size:14px;display:flex;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;position:relative}
 /* Liquid Glass Background Orbs */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background:
-  radial-gradient(ellipse 900px 200px at 50% -60px,rgba(94,92,230,.35) 0%,transparent 55%),
-  radial-gradient(ellipse 600px 600px at 8% -12%,rgba(210,190,245,.55) 0%,transparent 65%),
-  radial-gradient(ellipse 500px 500px at 92% 25%,rgba(180,210,250,.5) 0%,transparent 65%),
-  radial-gradient(ellipse 550px 550px at 55% 115%,rgba(180,235,200,.5) 0%,transparent 65%),
-  radial-gradient(ellipse 400px 400px at 2% 55%,rgba(255,220,180,.45) 0%,transparent 65%),
-  radial-gradient(ellipse 380px 380px at 88% 78%,rgba(240,200,220,.45) 0%,transparent 65%)
+  radial-gradient(ellipse 1000px 250px at 50% -80px,rgba(94,92,230,.45) 0%,transparent 50%),
+  radial-gradient(ellipse 700px 700px at 5% -15%,rgba(210,190,245,.65) 0%,transparent 60%),
+  radial-gradient(ellipse 600px 600px at 95% 20%,rgba(180,210,250,.6) 0%,transparent 60%),
+  radial-gradient(ellipse 600px 600px at 50% 110%,rgba(180,235,200,.6) 0%,transparent 60%),
+  radial-gradient(ellipse 450px 450px at 0% 60%,rgba(255,200,160,.55) 0%,transparent 60%),
+  radial-gradient(ellipse 400px 400px at 90% 75%,rgba(250,180,210,.55) 0%,transparent 60%)
 ;}
 ::selection{background:rgba(94,92,230,.15);color:var(--t)}
 
@@ -87,17 +87,17 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 /* ===== MAIN ===== */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .topbar{
-  background:rgba(255,255,255,.25);
-  backdrop-filter:blur(24px) saturate(220%) brightness(1.08);
-  -webkit-backdrop-filter:blur(24px) saturate(220%) brightness(1.08);
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(14px) saturate(300%) brightness(1.1);
+  -webkit-backdrop-filter:blur(14px) saturate(300%) brightness(1.1);
   height:48px;border-radius:24px;display:flex;align-items:center;
   position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:50;overflow:hidden;
-  border:1px solid rgba(255,255,255,.6);
+  border:1px solid rgba(255,255,255,.7);
   box-shadow:
-    0 1px 3px rgba(0,0,0,.04),
-    0 6px 20px rgba(31,38,135,.1),
-    inset 0 1px 0 rgba(255,255,255,.75),
-    inset 0 -1px 0 rgba(0,0,0,.03);
+    0 2px 4px rgba(0,0,0,.05),
+    0 8px 28px rgba(94,92,230,.12),
+    inset 0 1px 1px rgba(255,255,255,.85),
+    inset 0 -1px 0 rgba(0,0,0,.04);
   width:calc(100% - 48px);max-width:900px;
 }
 .topbar::before{
