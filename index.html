@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-28 03:04 · modular -->
+<!-- v2.1 · 2026-06-28 03:20 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -20,15 +20,15 @@
 <style>
 /* ===== iOS 26 LIQUID GLASS DESIGN ===== */
 :root{
-  --r:#ff453a;--bg:#f2f2f7;--card:rgba(255,255,255,.08);--t:#1d1d1f;--ts:#86868b;--bdr:rgba(255,255,255,.18);
+  --r:#ff453a;--bg:#f2f2f7;--card:transparent;--t:#1d1d1f;--ts:#86868b;--bdr:rgba(255,255,255,.18);
   --bl:#007aff;--gn:#30d158;--or:#ff9f0a;--pu:#5e5ce6;
-  --sidebar-bg:rgba(255,255,255,.08);--sidebar-hover:rgba(0,0,0,.03);
+  --sidebar-bg:transparent;--sidebar-hover:rgba(0,0,0,.03);
   --sh:0 8px 24px rgba(31,38,135,.12),inset 0 1px 1px rgba(255,255,255,.8);--panel-bg:rgba(0,0,0,.03);
   --amber-bg:rgba(255,159,10,.08);--amber-border:rgba(255,159,10,.15);--amber-text:#78350f;
   --shadow-md:0 8px 32px rgba(31,38,135,.1),inset 0 1px 0 rgba(255,255,255,.6);--shadow-lg:0 16px 48px rgba(0,0,0,.1);
   --radius:18px;--radius-lg:24px;
   --transition:all .3s cubic-bezier(.25,.1,.25,1);
-  --glass-blur:blur(14px) saturate(300%) brightness(1.08);
+  --glass-blur:blur(20px) saturate(250%);
   --glass-border:rgba(255,255,255,.7);
   --glass-highlight:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,.05) 40%,transparent 70%);
   --glass-top-line:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
@@ -87,9 +87,9 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 /* ===== MAIN ===== */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .topbar{
-  background:rgba(255,255,255,.08);
-  backdrop-filter:blur(14px) saturate(300%) brightness(1.1);
-  -webkit-backdrop-filter:blur(14px) saturate(300%) brightness(1.1);
+  background:transparent;
+  backdrop-filter:blur(20px) saturate(250%);
+  -webkit-backdrop-filter:blur(20px) saturate(250%);
   height:48px;border-radius:24px;display:flex;align-items:center;
   position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:50;overflow:hidden;
   border:1px solid rgba(255,255,255,.7);
