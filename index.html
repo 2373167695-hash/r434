@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-28 03:20 · modular -->
+<!-- v2.1 · 2026-06-28 03:22 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -20,7 +20,7 @@
 <style>
 /* ===== iOS 26 LIQUID GLASS DESIGN ===== */
 :root{
-  --r:#ff453a;--bg:#f2f2f7;--card:transparent;--t:#1d1d1f;--ts:#86868b;--bdr:rgba(255,255,255,.18);
+  --r:#ff453a;--bg:#f2f2f7;--card:rgba(255,255,255,.03);--t:#1d1d1f;--ts:#86868b;--bdr:rgba(255,255,255,.18);
   --bl:#007aff;--gn:#30d158;--or:#ff9f0a;--pu:#5e5ce6;
   --sidebar-bg:transparent;--sidebar-hover:rgba(0,0,0,.03);
   --sh:0 8px 24px rgba(31,38,135,.12),inset 0 1px 1px rgba(255,255,255,.8);--panel-bg:rgba(0,0,0,.03);
@@ -28,7 +28,7 @@
   --shadow-md:0 8px 32px rgba(31,38,135,.1),inset 0 1px 0 rgba(255,255,255,.6);--shadow-lg:0 16px 48px rgba(0,0,0,.1);
   --radius:18px;--radius-lg:24px;
   --transition:all .3s cubic-bezier(.25,.1,.25,1);
-  --glass-blur:blur(20px) saturate(250%);
+  --glass-blur:blur(20px) saturate(260%);
   --glass-border:rgba(255,255,255,.7);
   --glass-highlight:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,.05) 40%,transparent 70%);
   --glass-top-line:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
@@ -37,7 +37,7 @@
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--t);line-height:1.5;font-size:14px;display:flex;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;position:relative}
 /* Liquid Glass Background Orbs */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background:
-  radial-gradient(ellipse 1100px 300px at 50% -100px,rgba(94,92,230,.55) 0%,transparent 45%),
+  radial-gradient(ellipse 1200px 350px at 50% -120px,rgba(120,80,255,.6) 0%,transparent 42%),
   radial-gradient(ellipse 700px 700px at 5% -15%,rgba(210,190,245,.7) 0%,transparent 55%),
   radial-gradient(ellipse 600px 600px at 95% 20%,rgba(180,210,250,.65) 0%,transparent 55%),
   radial-gradient(ellipse 600px 600px at 50% 115%,rgba(180,235,200,.65) 0%,transparent 55%),
@@ -87,8 +87,8 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 /* ===== MAIN ===== */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .topbar{
-  background:transparent;
-  backdrop-filter:blur(20px) saturate(250%);
+  background:rgba(255,255,255,.03);
+  backdrop-filter:blur(20px) saturate(260%);
   -webkit-backdrop-filter:blur(20px) saturate(250%);
   height:48px;border-radius:24px;display:flex;align-items:center;
   position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:50;overflow:hidden;
