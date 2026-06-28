@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-28 07:14 · modular -->
+<!-- v2.1 · 2026-06-28 08:50 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -307,6 +307,11 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .btn-r{background:var(--r);color:#fff}.btn-r:hover{background:#e03a30}
 .btn-b{background:var(--bl);color:#fff}.btn-b:hover{background:#0066d6}
 .btn-gen{background:var(--pu);color:#fff}.btn-gen:hover{background:#4c4ad4}
+/* AI Action Button — glass style with purple accent */
+.ai-btn{display:inline-flex;align-items:center;gap:5px;padding:8px 18px;border-radius:var(--radius);border:1px solid var(--glass-sm-border);background:var(--glass-sm-bg);backdrop-filter:var(--glass-sm-blur);-webkit-backdrop-filter:var(--glass-sm-blur);color:var(--pu);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .3s cubic-bezier(.25,.1,.25,1);box-shadow:var(--sh)}
+.ai-btn:hover{background:rgba(94,92,230,.1);border-color:rgba(94,92,230,.25);transform:translateY(-1px)}
+.ai-btn:active{transform:scale(.97);transition:all .1s}
+.ai-btn-sm{padding:5px 12px;font-size:12px;border-radius:14px}
 
 /* ===== CHAT ===== */
 .chat-msg{max-width:88%;margin:6px 0;line-height:1.7;font-size:13px;word-break:break-word}
@@ -759,7 +764,7 @@ function callDS(msg,cid){var el=document.getElementById(cid);if(!el)return;fetch
     var fDiv=document.createElement('div');
     fDiv.id='follow_'+fid;
     fDiv.style.cssText='margin-top:12px;display:flex;gap:6px';
-    fDiv.innerHTML='<textarea id="fq_'+fid+'" placeholder="继续追问..." style="flex:1;min-height:36px;border:1px solid #d0cdc6;border-radius:8px;padding:8px;font-size:12px;resize:none;font-family:inherit" rows="2"></textarea><button onclick="aiFollowUp(\''+fid+'\')" style="padding:6px 14px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap">追问</button>';
+    fDiv.innerHTML='<textarea id="fq_'+fid+'" placeholder="继续追问..." style="flex:1;min-height:36px;border:1px solid var(--bdr);border-radius:12px;padding:8px;font-size:12px;resize:none;font-family:inherit" rows="2"></textarea><button class="ai-btn ai-btn-sm" onclick="aiFollowUp(\''+fid+'\')">追问</button>';
     el.parentNode.appendChild(fDiv);
     try{el.setAttribute('data-ctx',JSON.stringify(msg));}catch(e){}
   }return;}b+=d.decode(r.value,{stream:true});var ls=b.split("\n");b=ls.pop()||"";ls.forEach(function(l){if(l.startsWith("data: ")){var dd=l.substring(6);if(dd==="[DONE]")return;try{var p=JSON.parse(dd);if(p.choices&&p.choices[0].delta){var x=p.choices[0].delta.content||"";if(x){t+=x;el.innerHTML=renderMarkdown(t);
@@ -768,7 +773,7 @@ function callDS(msg,cid){var el=document.getElementById(cid);if(!el)return;fetch
     var fDiv=document.createElement('div');
     fDiv.id='follow_'+fid;
     fDiv.style.cssText='margin-top:12px;display:flex;gap:6px';
-    fDiv.innerHTML='<textarea id="fq_'+fid+'" placeholder="继续追问..." style="flex:1;min-height:36px;border:1px solid #d0cdc6;border-radius:8px;padding:8px;font-size:12px;resize:none;font-family:inherit" rows="2"></textarea><button onclick="aiFollowUp(\''+fid+'\')" style="padding:6px 14px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap">追问</button>';
+    fDiv.innerHTML='<textarea id="fq_'+fid+'" placeholder="继续追问..." style="flex:1;min-height:36px;border:1px solid var(--bdr);border-radius:12px;padding:8px;font-size:12px;resize:none;font-family:inherit" rows="2"></textarea><button class="ai-btn ai-btn-sm" onclick="aiFollowUp(\''+fid+'\')">追问</button>';
     el.parentNode.appendChild(fDiv);
     try{el.setAttribute('data-ctx',JSON.stringify(msg));}catch(e){}
   }}}}catch(e){}}});n();})}n();}).catch(function(err){el.innerHTML="<span style=color:red>AI请求失败："+err.message+"</span>";});}
@@ -1345,7 +1350,7 @@ function showKnContent(key, topicName) {
     related.forEach(function(r) { h += '<span class="rt" onclick="navigateByKnowledge(\'' + r.replace(/'/g,"\\'") + '\')">' + r + '</span>'; });
     h += '</div>';
   }
-  h += '<div style="margin:20px 0;text-align:center;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" style="background:var(--pu);color:#fff" onclick="aiGenerateQuestion(\'' + title.replace(/'/g,"\\'") + '\')">🤖 AI出题</button><button class="btn" style="background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none" onclick="aiExplain(\'' + title.replace(/'/g,"\\'") + '\')">🎓 深度讲解</button></div>';
+  h += '<div style="margin:20px 0;text-align:center;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="ai-btn" onclick="aiGenerateQuestion(\'' + title.replace(/'/g,"\\'") + '\')">🤖 AI出题</button><button class="ai-btn" onclick="aiExplain(\'' + title.replace(/'/g,"\\'") + '\')">🎓 深度讲解</button></div>';
   h += '<div id="aiQuestions" style="display:none;margin-top:20px"><div class="pcard"><div class="pcard-hdr"><h3>🤖 AI生成的模拟题</h3></div><div class="pcard-body"><div id="aiQuestionsContent" style="font-size:14px;line-height:1.9"></div></div></div></div>';
   h += '<div id="aiExplain" style="display:none;margin-top:20px"><div class="pcard"><div class="pcard-hdr"><h3>🎓 AI深度讲解</h3><button onclick="document.getElementById(\'aiExplain\').style.display=\'none\'" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--ts)">✕</button></div><div class="pcard-body"><div id="aiExplainContent" style="font-size:14px;line-height:1.9"></div><div id="aiExplainFollowup" style="margin-top:12px;display:none"><div style="display:flex;gap:6px"><input id="aiExplainInput" placeholder="追问：这个理论哪里还不懂？" style="flex:1;padding:8px 12px;border:1px solid var(--bdr);border-radius:8px;font-size:13px" onkeypress="if(event.key===\'Enter\')aiExplainFollowup()"><button onclick="aiExplainFollowup()" style="padding:8px 16px;background:var(--pu);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">追问</button></div></div></div></div></div>';
   document.getElementById('ct').innerHTML = h;
@@ -1743,7 +1748,7 @@ function showMacro() {
       h += '<div class="hot-topic-hint">💡 <strong>考试提示：</strong>' + t.exam_hint + '</div>';
     }
     
-    h += '<div style="margin-top:10px"><button onclick="event.stopPropagation();aiMacroInterpret(\'' + t.title.replace(/'/g,"\\'") + '\',\'macroAI_'+i+'\')" style="padding:6px 14px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer">🤖 AI考点解读</button></div>';
+    h += '<div style="margin-top:10px"><button class="ai-btn ai-btn-sm" onclick="event.stopPropagation();aiMacroInterpret(\'' + t.title.replace(/'/g,"\\'") + '\',\'macroAI_'+i+'\')">🤖 AI考点解读</button></div>';
     h += '<div id="macroAI_' + i + '" style="margin-top:12px"></div>';
     h += '</div></div>';
   });
@@ -2127,7 +2132,7 @@ function showPredictions() {
   // AI个性化预测按钮
   var doneQ = DATA.filter(function(q) { return marks[q.id] && marks[q.id].done; }).length;
   var viewedKN = Object.keys(knowledgeViews).length;
-  h += '<div style="margin:16px 0;text-align:center"><button onclick="aiPredictExam()" style="background:linear-gradient(135deg,var(--pu),#9333ea);color:#fff;border:none;padding:14px 32px;border-radius:10px;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,.3)">🤖 AI个性化真题预测</button><div style="font-size:11px;color:var(--ts);margin-top:4px">基于你的学习进度（'+doneQ+'/'+DATA.length+'题已做）+13年真题规律+学术热点</div></div><div id="aiPredict" style="display:none"><div class="pcard"><div class="pcard-hdr"><h3>🤖 AI预测报告</h3></div><div class="pcard-body"><div id="aiPredictContent" style="line-height:1.8"></div></div></div></div>';
+  h += '<div style="margin:16px 0;text-align:center"><button class="ai-btn" onclick="aiPredictExam()" style="padding:14px 32px;font-size:15px;border-radius:20px">🤖 AI个性化真题预测</button><div style="font-size:11px;color:var(--ts);margin-top:4px">基于你的学习进度（'+doneQ+'/'+DATA.length+'题已做）+13年真题规律+学术热点</div></div><div id="aiPredict" style="display:none"><div class="pcard"><div class="pcard-hdr"><h3>🤖 AI预测报告</h3></div><div class="pcard-body"><div id="aiPredictContent" style="line-height:1.8"></div></div></div></div>';
   PREDICTIONS.forEach(function(p) {
     var probClass = p.probability.indexOf("★★★") >= 0 ? "prob-high" : "prob-med";
     h += '<div class="pcard"><div class="pcard-hdr"><h3>' + p.topic + '</h3>' +
@@ -2214,7 +2219,7 @@ function showProfessors() {
     var profId = 'profAI_' + name.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '_');
     var researchStr = p.research.join('、').replace(/'/g,"\\'");
     var recentStr = p.recent.replace(/'/g,"\\'");
-    h += '<div class="ai-btn-row"><button onclick="aiProfessorPredict(\'' + name.replace(/'/g,"\\'") + '\',[\'' + researchStr + '\'],\'' + recentStr + '\')" style="padding:6px 14px;background:linear-gradient(135deg,var(--pu),#9333ea);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer">🤖 AI推测出题方向</button></div>';
+    h += '<div class="ai-btn-row"><button class="ai-btn ai-btn-sm" onclick="aiProfessorPredict(\'' + name.replace(/'/g,"\\'") + '\',[\'' + researchStr + '\'],\'' + recentStr + '\')">🤖 AI推测出题方向</button></div>';
     h += '<div id="' + profId + '" style="margin-top:12px;padding:12px 14px;font-size:13px;line-height:1.7;background:#faf8ff;border-radius:8px;border:1px solid #ede9fe;min-height:20px"></div>';
     h += '<div class="prof-tags">';
     p.research.forEach(function(r) { h += '<span class="prof-tag">' + r + '</span>'; });
@@ -2425,11 +2430,11 @@ function qCard(q) {
     (q.knowledge && q.knowledge.length ? '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">' + q.knowledge.map(function(k){return '<span class="rt" style="cursor:pointer;font-size:11px" onclick="event.stopPropagation();navigateByKnowledge(\''+k.replace(/'/g,"\\'")+'\')">'+k+'</span>';}).join('') + '</div>' : '') +
     '<div style="margin-top:12px"><div class="kn-accordion"><div class="kn-acc-hdr" onclick="this.parentElement.classList.toggle(\'open\')"><span class="kn-acc-arrow">▸</span> 🤖 AI批改这道题</div>' +
     '<div class="kn-acc-body" id="grade-' + qid + '"><textarea id="ta-' + qid + '" placeholder="在此输入你的作答..." style="width:100%;min-height:60px;border:1px solid #d0cdc6;border-radius:8px;padding:10px;font-size:13px;resize:vertical;font-family:inherit"></textarea>' +
-    '<button onclick="event.stopPropagation();aiGradeQuestion(\'' + q.id + '\',\'' + qid + '\')" style="margin-top:8px;padding:6px 16px;background:var(--pu);color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer">提交批改</button>' +
+    '<button class="ai-btn ai-btn-sm" onclick="event.stopPropagation();aiGradeQuestion(\'' + q.id + '\',\'' + qid + '\')" style="margin-top:8px">提交批改</button>' +
     '<div id="result-' + qid + '" style="margin-top:10px;padding:10px;display:none"></div></div></div>' +
     '<div class="kn-accordion"><div class="kn-acc-hdr" onclick="this.parentElement.classList.toggle(\'open\')"><span class="kn-acc-arrow">▸</span> 🎓 AI讲解这道题</div>' +
     '<div class="kn-acc-body"><div id="qe_' + qid + '" style="font-size:13px;line-height:1.7"></div>' +
-    '<button onclick="event.stopPropagation();aiQuestionExplain(\'' + q.id + '\')" style="margin-top:8px;padding:6px 16px;background:#059669;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer">开始讲解</button></div></div>' +
+    '<button class="ai-btn ai-btn-sm" onclick="event.stopPropagation();aiQuestionExplain(\'' + q.id + '\')" style="margin-top:8px">开始讲解</button></div></div>' +
     '</div></div></div>';
 }
 
@@ -2674,7 +2679,7 @@ function showStats() {
     '<input type="file" id="importFile" style="display:none" onchange="importData(event)"></div>';
   
   // AI Diagnosis button
-  h += '<div style="margin:20px 0;text-align:center"><button onclick="aiDiagnose()" style="background:var(--pu);color:#fff;border:none;padding:12px 28px;border-radius:8px;font-size:14px;cursor:pointer">🤖 AI学习诊断</button></div><div id="aiDiagnosis" style="display:none"><div class="pcard"><div class="pcard-hdr"><h3>🤖 AI诊断报告</h3></div><div class="pcard-body"><div id="aiDiagnosisContent" style="line-height:1.8"></div></div></div></div>';
+  h += '<div style="margin:20px 0;text-align:center"><button class="ai-btn" onclick="aiDiagnose()">🤖 AI学习诊断</button></div><div id="aiDiagnosis" style="display:none"><div class="pcard"><div class="pcard-hdr"><h3>🤖 AI诊断报告</h3></div><div class="pcard-body"><div id="aiDiagnosisContent" style="line-height:1.8"></div></div></div></div>';
   
   // Module progress bars
   h += '<div class="pcard" style="margin-top:16px"><div class="pcard-hdr"><h3>📚 各模块学习进度</h3></div><div class="pcard-body">';
@@ -2812,7 +2817,7 @@ function callDSFast(msg, cid) {
     var fDiv=document.createElement('div');
     fDiv.id='follow_'+fid;
     fDiv.style.cssText='margin-top:12px;display:flex;gap:6px';
-    fDiv.innerHTML='<textarea id="fq_'+fid+'" placeholder="继续追问..." style="flex:1;min-height:36px;border:1px solid #d0cdc6;border-radius:8px;padding:8px;font-size:12px;resize:none;font-family:inherit" rows="2"></textarea><button onclick="aiFollowUp(\''+fid+'\')" style="padding:6px 14px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap">追问</button>';
+    fDiv.innerHTML='<textarea id="fq_'+fid+'" placeholder="继续追问..." style="flex:1;min-height:36px;border:1px solid var(--bdr);border-radius:12px;padding:8px;font-size:12px;resize:none;font-family:inherit" rows="2"></textarea><button class="ai-btn ai-btn-sm" onclick="aiFollowUp(\''+fid+'\')">追问</button>';
     el.parentNode.appendChild(fDiv);
     try{el.setAttribute('data-ctx',JSON.stringify(msg));}catch(e){}
   }return;}
@@ -2824,7 +2829,7 @@ function callDSFast(msg, cid) {
     var fDiv=document.createElement('div');
     fDiv.id='follow_'+fid;
     fDiv.style.cssText='margin-top:12px;display:flex;gap:6px';
-    fDiv.innerHTML='<textarea id="fq_'+fid+'" placeholder="继续追问..." style="flex:1;min-height:36px;border:1px solid #d0cdc6;border-radius:8px;padding:8px;font-size:12px;resize:none;font-family:inherit" rows="2"></textarea><button onclick="aiFollowUp(\''+fid+'\')" style="padding:6px 14px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap">追问</button>';
+    fDiv.innerHTML='<textarea id="fq_'+fid+'" placeholder="继续追问..." style="flex:1;min-height:36px;border:1px solid var(--bdr);border-radius:12px;padding:8px;font-size:12px;resize:none;font-family:inherit" rows="2"></textarea><button class="ai-btn ai-btn-sm" onclick="aiFollowUp(\''+fid+'\')">追问</button>';
     el.parentNode.appendChild(fDiv);
     try{el.setAttribute('data-ctx',JSON.stringify(msg));}catch(e){}
   }}}}catch(e){}}});n();})}n();
@@ -2838,7 +2843,7 @@ function aiCardExplain(kn) {
   var parent = el.closest('.cback') || document.querySelector('.cback');
   if (parent) parent.appendChild(el);
   var ctx = (typeof buildAIContext === 'function') ? buildAIContext(kn) : '';
-  var sys = '你是人大434考研辅导老师。请用通俗易懂的语言讲解这个知识点，要求：\n1.用一个生活中的类比引入\n2.核心逻辑3句话概括\n3.易混淆点对比\n4.一句话记忆口诀\n5.中文，200字内\n\n相关真题与语料：' + ctx;
+  var sys = '你是人大434考研辅导老师，擅长用通俗易懂的方式讲解专业知识。请讲解这个知识点，可以灵活运用类比、对比、案例等方式帮助理解。以下是相关参考资料：\n\n真题与语料：' + ctx;
   callDSFast([{role:'system', content:sys}, {role:'user', content:'请讲解：' + kn}], 'cardAI');
 }
 
@@ -2850,7 +2855,7 @@ function aiQuestionExplain(qid) {
   var el = document.getElementById(rid);
   if (!el) return;
   var ctx = (typeof buildAIContext === 'function') ? buildAIContext(q.question) : '';
-  var sys = '你是人大434考研阅卷老师。请讲解这道真题，要求：\n1.这道题考什么知识点\n2.命题意图和出题角度\n3.标准答题结构（分几步、每步写什么）\n4.常见失分点\n5.中文，300字内\n\n相关真题范例与语料：' + ctx;
+  var sys = '你是人大434考研阅卷老师。请讲解这道真题，分析命题意图、答题思路和常见失分点。以下是相关参考资料：\n\n真题范例与语料：' + ctx;
   callDSFast([{role:'system', content:sys}, {role:'user', content:'题目（'+q.year+'年#'+q.num+' '+q.type+'）：'+q.question}], rid);
 }
 
@@ -2861,7 +2866,7 @@ function aiMacroInterpret(topic, cid) {
   container.innerHTML = '<div class="pcard" style="margin:0;font-size:13px;line-height:1.7" id="macroAIInner_'+cid+'"><div class="pcard-body" style="color:var(--ts)">AI分析中...</div></div>';
   container.scrollIntoView({behavior:'smooth'});
   var ctx = (typeof buildAIContext === 'function') ? buildAIContext(topic) : '';
-  var sys = '你是人大434考研辅导老师，擅长分析宏观经济与考试的关联。请分析这个宏观热点，要求：\n1.这个事件的核心要点\n2.可能考什么知识点（列出2-3个）\n3.可能怎么出题（简答/论述/案例）\n4.建议怎么答（答题框架）\n5.中文，300字内\n\n相关真题与知识库：' + ctx;
+  var sys = '你是人大434考研辅导老师，擅长分析宏观经济热点与考试的关联。请分析这个宏观热点，指出可能涉及的考点和出题方向。以下是相关参考资料：\n\n真题与知识库：' + ctx;
   callDSFast([{role:'system', content:sys}, {role:'user', content:'请分析宏观热点：' + topic}], 'macroAIInner_'+cid);
 }
 
@@ -2878,7 +2883,7 @@ function aiGraphRelate(id1, id2) {
     panel.querySelector('.pcard-body, div[style*="padding:16px"]') ? panel.querySelector('div[style*="padding:16px"]').appendChild(div) : panel.appendChild(div);
   }
   var ctx = (typeof buildAIContext === 'function') ? buildAIContext(id1 + ' ' + id2) : '';
-  var sys = '你是人大434考研辅导老师。请分析两个知识点之间的关系，要求：\n1.理论演进关系（谁发展了谁）\n2.核心异同点对比（用表格）\n3.考试中常怎么一起考\n4.答题时怎么关联引用\n5.中文，300字内';
+  var sys = '你是人大434考研辅导老师。请深入分析这两个知识点之间的理论关联、异同点，以及在考试中如何关联运用。以下是相关参考资料：';
   callDSFast([{role:'system', content:sys}, {role:'user', content:'请分析这两个知识点的关系：\n知识点A：' + id1 + '\n知识点B：' + id2 + '\n\n相关语料：' + ctx}], rid);
 }
 
@@ -2888,7 +2893,7 @@ function aiProfessorPredict(name, research, recent) {
   var el = document.getElementById(rid);
   if (!el) return;
   el.innerHTML = '<span style="color:var(--ts)">思考中...</span>';
-  var sys = '你是人大434考研辅导老师。请基于导师的研究方向推测可能的出题方向。中文，300字内。';
+  var sys = '你是人大434考研辅导老师。请基于导师的研究方向和最新成果，推测可能的出题方向和备考建议。';
   callDSFast([{role:'system', content:sys}, {role:'user', content:'导师：'+name+'\n研究方向：'+(research||[]).join('、')+'\n最新成果：'+recent}], rid);
 }
 
@@ -3069,7 +3074,7 @@ function showCards() {
       '<button onclick="event.stopPropagation();reviewCard(\''+kn.replace(/'/g,"\\'")+'\',0)" style="padding:4px 10px;background:#f44336;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">不认识</button>'+
       '<button onclick="event.stopPropagation();reviewCard(\''+kn.replace(/'/g,"\\'")+'\',1)" style="padding:4px 10px;background:#FF9800;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">模糊</button>'+
       '<button onclick="event.stopPropagation();reviewCard(\''+kn.replace(/'/g,"\\'")+'\',3)" style="padding:4px 10px;background:#4CAF50;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">认识</button>'+
-      '<button onclick="event.stopPropagation();aiCardExplain(\''+kn.replace(/'/g,"\\'")+'\')" style="padding:4px 10px;background:#059669;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">🎓 AI讲解</button></div>';
+      '<button class="ai-btn ai-btn-sm" onclick="event.stopPropagation();aiCardExplain(\''+kn.replace(/'/g,"\\'")+'\')">🎓 AI讲解</button></div>';
     cardsHtml+='<div class="pcard" style="cursor:pointer;min-height:140px" onclick="var b=this.querySelector(\'.cback\');b.style.display=b.style.display===\'none\'?\'block\':\'none\';var f=this.querySelector(\'.cfront\');f.style.display=f.style.display===\'none\'?\'block\':\'none\'">'
       +'<div class="cfront" style="padding:16px;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;min-height:100px">'+front+'</div>'
       +'<div class="cback" style="display:none;padding:16px;font-size:13px;line-height:1.8">'+back+'</div></div>';
@@ -3173,7 +3178,7 @@ function showHotCategory(idx) {
       h += '<div style="background:#f0fdf4;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.7;color:#166534"><div style="font-weight:700;margin-bottom:4px">💼 案例</div>' + issue.case_study + '</div>';
     }
     
-    h += '<button onclick="aiHotExplain(\'' + idx + '_' + i + '\')" style="margin-top:12px;padding:8px 18px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">🧠 AI深入分析</button>';
+    h += '<button class="ai-btn" onclick="aiHotExplain(\'' + idx + '_' + i + '\')" style="margin-top:12px">🧠 AI深入分析</button>';
     h += '<div id="hotAI_' + idx + '_' + i + '" style="margin-top:10px"></div>';
     h += '</div></div>';
   });
@@ -3190,7 +3195,7 @@ function aiHotExplain(sid) {
     ? HOT_TOPICS.categories[catIdx].cards[cardIdx] : null;
   if (!issue) return;
   var ctx = (typeof buildAIContext === 'function') ? buildAIContext(issue.topic) : '';
-  var sys = '你是人大434考研辅导老师。请针对以下热点专题做深入的考点分析：\n\n【专题】' + issue.topic + '\n【背景】' + issue.news_brief + '\n【预测题目】' + issue.predicted_question + '\n\n【要求】\n1.补充3-5个可能关联的知识点\n2.给出参考答案要点（结构化）\n3.易混淆概念辨析\n4.记忆口诀\n中文，300字内\n\n参考真题与知识库：' + ctx;
+  var sys = '你是人大434考研辅导老师。请针对以下热点专题做深入的考点分析，包括关联知识点、答题思路和易错点辨析。\n\n【专题】' + issue.topic + '\n【背景】' + issue.news_brief + '\n【预测题目】' + issue.predicted_question + '\n\n参考真题与知识库：' + ctx;
   callDSFast([{role:'system', content:sys}, {role:'user', content:'请深入分析热点专题：' + issue.topic}], 'hotAI_' + sid);
 }
 var _aiChats = {};
