@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-29 00:53 · modular -->
+<!-- v2.1 · 2026-06-29 00:59 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -2846,10 +2846,17 @@ function callDSFast(msg, cid) {
   var el = document.getElementById(cid);
   if (!el) return;
   el.style.whiteSpace = 'pre-wrap'; el.style.wordBreak = 'break-word'; el.style.overflowWrap = 'break-word'; el.style.maxHeight = '600px'; el.style.overflowY = 'auto';   el.innerHTML = '<span style="color:var(--ts)">思考中...</span>';
-  fetch(DS_URL, {method:'POST', headers:{Authorization:'Bearer '+getAPIKey(), 'Content-Type':'application/json'},
-    body: JSON.stringify({model:'mimo-v2.5', messages:msg, stream:true, temperature:0.3})
-  }).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.body.getReader();})
-  .then(function(rd){var b='',t='',d=new TextDecoder();function n(){rd.read().then(function(r){
+  
+  function doRequest(key) {
+    fetch(DS_URL, {method:'POST', headers:{Authorization:'Bearer '+key, 'Content-Type':'application/json'},
+      body: JSON.stringify({model:'mimo-v2.5', messages:msg, stream:true, temperature:0.3})
+    }).then(function(r){
+      if(r.status===401){_apikey=null;_apikeyPromise=null;el.innerHTML='<span style="color:var(--r)">API密钥过期，正在刷新...</span>';
+        getAPIKey(function(newKey){if(newKey)doRequest(newKey);else el.innerHTML='<span style="color:var(--r)">API密钥获取失败，请刷新页面重新登录</span>';});
+        throw Error('retry');}
+      if(!r.ok)throw Error('HTTP '+r.status);
+      return r.body.getReader();
+    }).then(function(rd){if(!rd)return;var b='',t='',d=new TextDecoder();function n(){rd.read().then(function(r){
     if(r.done){el.innerHTML=renderMarkdown(t);
   var fid=el.id||cid;
   if(fid&&!document.getElementById('follow_'+fid)){
@@ -2872,7 +2879,12 @@ function callDSFast(msg, cid) {
     el.parentNode.appendChild(fDiv);
     try{el.setAttribute('data-ctx',JSON.stringify(msg));}catch(e){}
   }}}}catch(e){}}});n();})}n();
-  }).catch(function(err){el.innerHTML='<span style="color:var(--r)">请求失败：'+err.message+'</span>';});
+    }).catch(function(err){if(err.message!=='retry')el.innerHTML='<span style="color:var(--r)">请求失败：'+err.message+'</span>';});
+  }
+  
+  var key = getAPIKey();
+  if (key) { doRequest(key); }
+  else { getAPIKey(function(newKey){ if(newKey) doRequest(newKey); else el.innerHTML='<span style="color:var(--r)">API密钥未加载，请刷新页面</span>'; }); }
 }
 
 // 2. 记忆卡AI讲解
