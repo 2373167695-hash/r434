@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-29 01:04 · modular -->
+<!-- v2.1 · 2026-06-29 01:08 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -1389,6 +1389,35 @@ function showKnContent(key, topicName) {
     related.forEach(function(r) { h += '<span class="rt" onclick="navigateByKnowledge(\'' + r.replace(/'/g,"\\'") + '\')">' + r + '</span>'; });
     h += '</div>';
   }
+  // Linear navigation
+  if (KNOWLEDGE_NAV && KNOWLEDGE_NAV.sections) {
+    var flatTopics2 = [];
+    KNOWLEDGE_NAV.sections.forEach(function(part) {
+      (part.chapters||[]).forEach(function(ch) {
+        (ch.groups||[]).forEach(function(grp) {
+          (grp.topics||[]).forEach(function(tp) { flatTopics2.push(tp); });
+        });
+      });
+    });
+    var curIdx2 = -1;
+    for (var ti = 0; ti < flatTopics2.length; ti++) {
+      if (flatTopics2[ti].key === key || flatTopics2[ti].name === title) { curIdx2 = ti; break; }
+    }
+    if (curIdx2 >= 0) {
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid var(--bdr)">';
+      if (curIdx2 > 0) {
+        var prev2 = flatTopics2[curIdx2-1];
+        h += '<button onclick="navigate(\'kn:'+prev2.key+'\',\''+prev2.name.replace(/'/g,"\\'")+'\')" style="background:none;border:none;cursor:pointer;color:var(--pu);font-size:13px;text-align:left;flex:1">← '+prev2.name+'</button>';
+      } else { h += '<span style="flex:1"></span>'; }
+      h += '<span style="font-size:11px;color:var(--ts);padding:0 8px">'+(curIdx2+1)+'/'+flatTopics2.length+'</span>';
+      if (curIdx2 < flatTopics2.length-1) {
+        var next2 = flatTopics2[curIdx2+1];
+        h += '<button onclick="navigate(\'kn:'+next2.key+'\',\''+next2.name.replace(/'/g,"\\'")+'\')" style="background:none;border:none;cursor:pointer;color:var(--pu);font-size:13px;text-align:right;flex:1">'+next2.name+' →</button>';
+      } else { h += '<span style="flex:1"></span>'; }
+      h += '</div>';
+    }
+  }
+  // AI buttons
   h += '<div style="margin:20px 0;text-align:center;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="ai-btn" onclick="aiGenerateQuestion(\'' + title.replace(/'/g,"\\'") + '\')">🤖 AI出题</button><button class="ai-btn" onclick="aiExplain(\'' + title.replace(/'/g,"\\'") + '\')">🎓 深度讲解</button></div>';
   h += '<div id="aiQuestions" style="display:none;margin-top:20px"><div class="pcard"><div class="pcard-hdr"><h3>🤖 AI生成的模拟题</h3></div><div class="pcard-body"><div id="aiQuestionsContent" style="font-size:14px;line-height:1.9"></div></div></div></div>';
   h += '<div id="aiExplain" style="display:none;margin-top:20px"><div class="pcard"><div class="pcard-hdr"><h3>🎓 AI深度讲解</h3><button onclick="document.getElementById(\'aiExplain\').style.display=\'none\'" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--ts)">✕</button></div><div class="pcard-body"><div id="aiExplainContent" style="font-size:14px;line-height:1.9"></div><div id="aiExplainFollowup" style="margin-top:12px;display:none"><div style="display:flex;gap:6px"><input id="aiExplainInput" placeholder="追问：这个理论哪里还不懂？" style="flex:1;padding:8px 12px;border:1px solid var(--bdr);border-radius:8px;font-size:13px" onkeypress="if(event.key===\'Enter\')aiExplainFollowup()"><button onclick="aiExplainFollowup()" style="padding:8px 16px;background:var(--pu);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">追问</button></div></div></div></div></div>';
@@ -2417,7 +2446,7 @@ function showTopic(path, defaultTab) {
       if (flatTopics[ti].key === tn || flatTopics[ti].name === tn) { curIdx = ti; break; }
     }
     if (curIdx >= 0) {
-      h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:12px 16px;background:#fafaf7;border-radius:10px">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid var(--bdr)">';
       if (curIdx > 0) {
         var prev = flatTopics[curIdx-1];
         h += '<button onclick="navigate(\'kn:'+prev.key+'\',\''+prev.name.replace(/'/g,"\\'")+'\')" style="background:none;border:none;cursor:pointer;color:var(--pu);font-size:13px;text-align:left;flex:1">← '+prev.name+'</button>';
@@ -2430,6 +2459,8 @@ function showTopic(path, defaultTab) {
       h += '</div>';
     }
   }
+  // AI action buttons
+  h += '<div style="margin:16px 0 0;text-align:center;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="ai-btn" onclick="aiGenerateQuestion(\'' + tn.replace(/'/g,"\\'") + '\')">🤖 AI出题</button><button class="ai-btn" onclick="aiExplain(\'' + tn.replace(/'/g,"\\'") + '\')">🎓 深度讲解</button></div>';
   h += '</div>'; // close knContent tab
   
   // ===== TAB 2: Questions Only =====
