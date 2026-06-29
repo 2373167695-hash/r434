@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-29 01:11 · modular -->
+<!-- v2.1 · 2026-06-29 01:34 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -331,7 +331,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .qa strong{color:var(--r)}
 .qa2{display:flex;gap:6px;margin-left:8px}
 .qa2 button{border:none;background:none;cursor:pointer;font-size:15px;padding:4px;border-radius:6px;transition:var(--transition)}
-.qa2 button:hover{background:rgba(0,0,0,.04)}
+.qa2 button:hover{background:rgba(255,255,255,.08)}
 .qa2 .star{color:#f59e0b}.qa2 .done{color:var(--gn)}
 
 /* ===== QUIZ ===== */
@@ -572,10 +572,10 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
     <input type="password" id="loginPwd" placeholder="密码" onkeydown="if(event.key==='Enter')doLogin()">
     <input type="text" id="loginInvite" class="invite" placeholder="邀请码（注册必填）" style="display:none">
         <button type="button" id="btnLogin" style="cursor:pointer">登录</button>
-    <button type="button" id="btnRegister" style="background:#f0fdf4;color:#059669;border:1px solid #a7f3d0;margin-top:8px;cursor:pointer">注册新账号</button>
+    <button type="button" id="btnRegister" style="background:rgba(48,209,88,.12);color:#4ade80;border:1px solid rgba(48,209,88,.2);margin-top:8px;cursor:pointer;border-radius:10px;padding:8px 16px;font-size:13px">注册新账号</button>
     <div class="err" id="loginErr"></div>
     <div class="sync-status" id="syncStatus"></div>
-    <div style="font-size:10px;color:#ccc;margin-top:8px">v2.0 · KV</div>
+    <div style="font-size:10px;color:var(--ts);margin-top:8px">v2.0 · KV</div>
     <script>
     var _api = 'https://api.ruc434s.cloud';
     function _loginReg(path, u, p, e, inv) {
@@ -1517,9 +1517,9 @@ function renderMarkdown(text) {
         row.forEach(function(cell) {
           cell = cell.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
           if (ri === 0) {
-            html += '<th style="border:1px solid var(--bdr);padding:5px 8px;background:#f5f3ef;text-align:left;font-size:11px">' + cell + '</th>';
+            html += '<th style="border:1px solid var(--bdr);padding:5px 8px;background:rgba(255,255,255,.04);text-align:left;font-size:11px">' + cell + '</th>';
           } else {
-            html += '<td style="border:1px solid #e0ddd6;padding:5px 8px;font-size:12px">' + cell + '</td>';
+            html += '<td style="border:1px solid var(--bdr);padding:5px 8px;font-size:12px">' + cell + '</td>';
           }
         });
         html += '</tr>';
@@ -1543,7 +1543,7 @@ function renderMarkdown(text) {
     // Horizontal rule
     if (/^---+$/.test(trimmed) || /^\*\*\*$/.test(trimmed)) { html += '<hr style="border:none;border-top:1px solid var(--bdr);margin:12px 0">'; i++; continue; }
     // Block quote
-    if (/^&gt;\s+/.test(trimmed) || /^>\s+/.test(trimmed)) { html += '<blockquote style="border-left:3px solid var(--pu);padding-left:10px;margin:6px 0;color:#666">' + trimmed.replace(/^&gt;\s+/, '').replace(/^>\s+/, '') + '</blockquote>'; i++; continue; }
+    if (/^&gt;\s+/.test(trimmed) || /^>\s+/.test(trimmed)) { html += '<blockquote style="border-left:3px solid var(--pu);padding-left:10px;margin:6px 0;color:var(--ts)">' + trimmed.replace(/^&gt;\s+/, '').replace(/^>\s+/, '') + '</blockquote>'; i++; continue; }
     // Lists - collect consecutive list items
     if (/^(\d+[\.、])\s+/.test(trimmed) || /^[-•·]\s+/.test(trimmed)) {
       var listItems = [];
@@ -1576,7 +1576,7 @@ function renderMarkdown(text) {
     para = para.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:6px;vertical-align:middle">');
     para = para.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     para = para.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    para = para.replace(/`(.+?)`/g, '<code style="background:#e8e8e8;padding:2px 4px;border-radius:3px;font-size:12px">$1</code>');
+    para = para.replace(/`(.+?)`/g, '<code style="background:rgba(255,255,255,.08);padding:2px 4px;border-radius:3px;font-size:12px">$1</code>');
     html += '<p style="margin:4px 0;font-size:13px;line-height:1.7">' + para + '</p>';
     i++;
   }
@@ -1809,7 +1809,7 @@ function showMacro() {
     }
     
     if (t.analysis) {
-      h += '<p style="font-size:13px;color:var(--t);line-height:1.8;padding:8px 12px;background:#f8f6f2;border-radius:8px">' + t.analysis + '</p>';
+      h += '<p style="font-size:13px;color:var(--t);line-height:1.8;padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px">' + t.analysis + '</p>';
     }
     
     if (t.exam_hint) {
@@ -2288,7 +2288,7 @@ function showProfessors() {
     var researchStr = p.research.join('、').replace(/'/g,"\\'");
     var recentStr = p.recent.replace(/'/g,"\\'");
     h += '<div class="ai-btn-row"><button class="ai-btn ai-btn-sm" onclick="aiProfessorPredict(\'' + name.replace(/'/g,"\\'") + '\',[\'' + researchStr + '\'],\'' + recentStr + '\')">🤖 AI推测出题方向</button></div>';
-    h += '<div id="' + profId + '" style="margin-top:12px;padding:12px 14px;font-size:13px;line-height:1.7;background:#faf8ff;border-radius:8px;border:1px solid #ede9fe;min-height:20px"></div>';
+    h += '<div id="' + profId + '" style="margin-top:12px;padding:12px 14px;font-size:13px;line-height:1.7;background:rgba(255,255,255,.04);border-radius:8px;border:1px solid rgba(124,58,237,.15);min-height:20px"></div>';
     h += '<div class="prof-tags">';
     p.research.forEach(function(r) { h += '<span class="prof-tag">' + r + '</span>'; });
     h += '</div></div></div>';
@@ -2679,7 +2679,7 @@ function renderQuiz() {
   var min = Math.floor(quizSeconds/60), sec = quizSeconds%60;
   var timerHtml = '<span id="quizTimer" style="color:'+(quizSeconds>600?'#f44336':'var(--ts)')+'">⏱ '+(min<10?'0':'')+min+':'+(sec<10?'0':'')+sec+'</span>';
   var dots = "";
-  for (var i = 0; i < quizQs.length; i++) dots += '<div style="width:8px;height:8px;border-radius:50%;background:' + (i == quizIdx ? "var(--r)" : (i < quizIdx ? "var(--gn)" : "#e5e5e5")) + '"></div>';
+  for (var i = 0; i < quizQs.length; i++) dots += '<div style="width:8px;height:8px;border-radius:50%;background:' + (i == quizIdx ? "var(--r)" : (i < quizIdx ? "var(--gn)" : "rgba(255,255,255,.15)")) + '"></div>';
   var tc = q.type == "简答" ? "ts" : q.type == "论述" ? "tl" : q.type == "计算" ? "tj" : "ta";
   document.getElementById("bc").innerHTML = '<span>🎲 ' + (quizIdx + 1) + '/' + quizQs.length + ' ' + timerHtml + '</span>';
   document.getElementById("ct").innerHTML = '<div class="quiz-box" style="margin:0 auto">' +
@@ -2760,7 +2760,7 @@ function showStats() {
     var pct = Math.round(s.viewed / s.total * 100);
     var color = pct >= 80 ? '#4CAF50' : pct >= 40 ? '#FF9800' : '#f44336';
     h += '<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px"><strong>' + mod + '</strong> (' + s.viewed + '/' + s.total + ')</span><span style="font-size:13px;color:' + color + '">' + pct + '%</span></div>';
-    h += '<div style="background:#e8e8e8;border-radius:4px;height:8px"><div style="background:' + color + ';height:8px;border-radius:4px;width:' + pct + '%"></div></div></div>';
+    h += '<div style="background:rgba(255,255,255,.08);border-radius:4px;height:8px"><div style="background:' + color + ';height:8px;border-radius:4px;width:' + pct + '%"></div></div></div>';
   });
   h += '<div style="margin-top:16px"><canvas id="chartRadar" style="max-height:280px"></canvas></div>';
   h += '</div></div>';
@@ -2909,7 +2909,7 @@ function callDSFast(msg, cid) {
 // 2. 记忆卡AI讲解
 function aiCardExplain(kn) {
   var el = document.getElementById('cardAI');
-  if (!el) { el = document.createElement('div'); el.id = 'cardAI'; el.style.cssText = 'margin-top:8px;padding:10px;background:#f8f6f2;border-radius:8px;font-size:12px;line-height:1.7'; }
+  if (!el) { el = document.createElement('div'); el.id = 'cardAI'; el.style.cssText = 'margin-top:8px;padding:10px;background:rgba(255,255,255,.04);border-radius:8px;font-size:12px;line-height:1.7'; }
   var parent = el.closest('.cback') || document.querySelector('.cback');
   if (parent) parent.appendChild(el);
   var ctx = (typeof buildAIContext === 'function') ? buildAIContext(kn) : '';
@@ -2949,7 +2949,7 @@ function aiGraphRelate(id1, id2) {
   if (!existing) {
     var div = document.createElement('div');
     div.id = rid;
-    div.style.cssText = 'margin-top:12px;padding:12px;background:#f8f6f2;border-radius:8px;font-size:12px;line-height:1.7';
+    div.style.cssText = 'margin-top:12px;padding:12px;background:rgba(255,255,255,.04);border-radius:8px;font-size:12px;line-height:1.7';
     panel.querySelector('.pcard-body, div[style*="padding:16px"]') ? panel.querySelector('div[style*="padding:16px"]').appendChild(div) : panel.appendChild(div);
   }
   var ctx = (typeof buildAIContext === 'function') ? buildAIContext(id1 + ' ' + id2) : '';
@@ -3033,7 +3033,7 @@ function showGraph() {
   document.getElementById('bc').innerHTML = '<span>🕸️ 知识图谱</span>';
   var G = {nodes:[], edges:[], nodeMap:{}, filters:{mod:{}, edgeType:'all', unviewed:false, kw:''}};
   var modColors = {'国际贸易':'#7c3aed','国际投资与跨国公司':'#2563eb','国际金融':'#059669','新兴议题':'#ea580c'};
-  var modLight = {'国际贸易':'#ede9fe','国际投资与跨国公司':'#dbeafe','国际金融':'#d1fae5','新兴议题':'#ffedd5'};
+  var modLight = {'国际贸易':'rgba(124,58,237,.15)','国际投资与跨国公司':'#dbeafe','国际金融':'#d1fae5','新兴议题':'#ffedd5'};
   var modList = ['国际贸易','国际投资与跨国公司','国际金融','新兴议题'];
   modList.forEach(function(m){G.filters.mod[m]=true;});
   for (var k in KNOWLEDGE) {
@@ -3100,9 +3100,9 @@ function showGraph() {
 
 function graphFilter(){var G=window._graph;G.filters.kw=(document.getElementById('graphSearch')||{}).value||'';G.filters.edgeType=(document.getElementById('graphEdgeFilter')||{}).value||'all';G.filters.unviewed=(document.getElementById('graphUnviewed')||{}).checked||false;document.querySelectorAll('.graph-mod-toggle').forEach(function(cb){G.filters.mod[cb.dataset.mod]=cb.checked;});graphRender();}
 function isNodeVisible(n,G){if(!G.filters.mod[n.module])return false;if(G.filters.unviewed&&n.viewed)return false;if(G.filters.kw&&n.label.indexOf(G.filters.kw)<0)return false;return true;}
-function graphRender(){var G=window._graph;var mc={'国际贸易':'#7c3aed','国际投资与跨国公司':'#2563eb','国际金融':'#059669','新兴议题':'#ea580c'};var ml={'国际贸易':'#ede9fe','国际投资与跨国公司':'#dbeafe','国际金融':'#d1fae5','新兴议题':'#ffedd5'};var eh='';G.edges.forEach(function(e){if(G.filters.edgeType!=='all'&&e.type!==G.filters.edgeType)return;var ni=G.nodes[G.nodeMap[e.source]],nj=G.nodes[G.nodeMap[e.target]];if(!isNodeVisible(ni,G)||!isNodeVisible(nj,G))return;var mx=(ni.x+nj.x)/2,my=(ni.y+nj.y)/2,dx=nj.x-ni.x,dy=nj.y-ni.y;var ec=e.type==='evolution'?'#a78bfa':'#cbd5e1';var ew=Math.min(e.weight*1.2,3.5);eh+='<path d="M'+ni.x.toFixed(1)+' '+ni.y.toFixed(1)+' Q'+(mx-dy*0.08).toFixed(1)+' '+(my+dx*0.08).toFixed(1)+' '+nj.x.toFixed(1)+' '+nj.y.toFixed(1)+'" stroke="'+ec+'" stroke-width="'+ew+'" fill="none" opacity="0.3" class="graph-edge" data-source="'+e.source.replace(/"/g,'&quot;')+'" data-target="'+e.target.replace(/"/g,'&quot;')+'"/>';});document.getElementById('graphEdges').innerHTML=eh;var nh='';G.nodes.forEach(function(n){if(!isNodeVisible(n,G))return;var gid='grad-'+n.module.substring(0,2);nh+='<g class="graph-node" style="cursor:pointer" data-id="'+n.id.replace(/"/g,'&quot;')+'" onclick="graphNodeClick(\''+n.id.replace(/'/g,"\\'")+'\')">';if(n.viewed)nh+='<circle cx="'+n.x.toFixed(1)+'" cy="'+n.y.toFixed(1)+'" r="'+(n.size+4)+'" fill="none" stroke="#10b981" stroke-width="1.5" opacity="0.5" stroke-dasharray="3 2"/>';nh+='<circle cx="'+n.x.toFixed(1)+'" cy="'+(n.y+2).toFixed(1)+'" r="'+n.size+'" fill="rgba(0,0,0,0.08)"/>';nh+='<circle cx="'+n.x.toFixed(1)+'" cy="'+n.y.toFixed(1)+'" r="'+n.size+'" fill="url(#'+gid+')" stroke="'+n.color+'" stroke-width="1.5" class="graph-circle" data-id="'+n.id.replace(/"/g,'&quot;')+'"><title>'+n.label+' ('+n.examCount+'次考察)</title></circle>';var fs=n.size>18?10:8;nh+='<text x="'+n.x.toFixed(1)+'" y="'+(n.y+n.size+12).toFixed(1)+'" text-anchor="middle" font-size="'+fs+'" fill="#4b5563" style="pointer-events:none;font-weight:600">'+n.label.substring(0,7)+'</text>';nh+='</g>';});document.getElementById('graphNodes').innerHTML=nh;var svg=document.getElementById('graphSvg');svg.querySelectorAll('.graph-node').forEach(function(g){g.addEventListener('mouseenter',function(){var id=this.dataset.id;svg.querySelectorAll('.graph-edge').forEach(function(e){if(e.dataset.source===id||e.dataset.target===id){e.style.opacity='0.8';e.style.strokeWidth=parseFloat(e.getAttribute('stroke-width'))*2;}else e.style.opacity='0.06';});svg.querySelectorAll('.graph-node').forEach(function(n){if(n.dataset.id!==id)n.style.opacity='0.2';});});g.addEventListener('mouseleave',function(){svg.querySelectorAll('.graph-edge').forEach(function(e){e.style.opacity='0.3';e.style.strokeWidth='';});svg.querySelectorAll('.graph-node').forEach(function(n){n.style.opacity='1';});});});}
+function graphRender(){var G=window._graph;var mc={'国际贸易':'#7c3aed','国际投资与跨国公司':'#2563eb','国际金融':'#059669','新兴议题':'#ea580c'};var ml={'国际贸易':'rgba(124,58,237,.15)','国际投资与跨国公司':'#dbeafe','国际金融':'#d1fae5','新兴议题':'#ffedd5'};var eh='';G.edges.forEach(function(e){if(G.filters.edgeType!=='all'&&e.type!==G.filters.edgeType)return;var ni=G.nodes[G.nodeMap[e.source]],nj=G.nodes[G.nodeMap[e.target]];if(!isNodeVisible(ni,G)||!isNodeVisible(nj,G))return;var mx=(ni.x+nj.x)/2,my=(ni.y+nj.y)/2,dx=nj.x-ni.x,dy=nj.y-ni.y;var ec=e.type==='evolution'?'#a78bfa':'#cbd5e1';var ew=Math.min(e.weight*1.2,3.5);eh+='<path d="M'+ni.x.toFixed(1)+' '+ni.y.toFixed(1)+' Q'+(mx-dy*0.08).toFixed(1)+' '+(my+dx*0.08).toFixed(1)+' '+nj.x.toFixed(1)+' '+nj.y.toFixed(1)+'" stroke="'+ec+'" stroke-width="'+ew+'" fill="none" opacity="0.3" class="graph-edge" data-source="'+e.source.replace(/"/g,'&quot;')+'" data-target="'+e.target.replace(/"/g,'&quot;')+'"/>';});document.getElementById('graphEdges').innerHTML=eh;var nh='';G.nodes.forEach(function(n){if(!isNodeVisible(n,G))return;var gid='grad-'+n.module.substring(0,2);nh+='<g class="graph-node" style="cursor:pointer" data-id="'+n.id.replace(/"/g,'&quot;')+'" onclick="graphNodeClick(\''+n.id.replace(/'/g,"\\'")+'\')">';if(n.viewed)nh+='<circle cx="'+n.x.toFixed(1)+'" cy="'+n.y.toFixed(1)+'" r="'+(n.size+4)+'" fill="none" stroke="#10b981" stroke-width="1.5" opacity="0.5" stroke-dasharray="3 2"/>';nh+='<circle cx="'+n.x.toFixed(1)+'" cy="'+(n.y+2).toFixed(1)+'" r="'+n.size+'" fill="rgba(0,0,0,0.08)"/>';nh+='<circle cx="'+n.x.toFixed(1)+'" cy="'+n.y.toFixed(1)+'" r="'+n.size+'" fill="url(#'+gid+')" stroke="'+n.color+'" stroke-width="1.5" class="graph-circle" data-id="'+n.id.replace(/"/g,'&quot;')+'"><title>'+n.label+' ('+n.examCount+'次考察)</title></circle>';var fs=n.size>18?10:8;nh+='<text x="'+n.x.toFixed(1)+'" y="'+(n.y+n.size+12).toFixed(1)+'" text-anchor="middle" font-size="'+fs+'" fill="#4b5563" style="pointer-events:none;font-weight:600">'+n.label.substring(0,7)+'</text>';nh+='</g>';});document.getElementById('graphNodes').innerHTML=nh;var svg=document.getElementById('graphSvg');svg.querySelectorAll('.graph-node').forEach(function(g){g.addEventListener('mouseenter',function(){var id=this.dataset.id;svg.querySelectorAll('.graph-edge').forEach(function(e){if(e.dataset.source===id||e.dataset.target===id){e.style.opacity='0.8';e.style.strokeWidth=parseFloat(e.getAttribute('stroke-width'))*2;}else e.style.opacity='0.06';});svg.querySelectorAll('.graph-node').forEach(function(n){if(n.dataset.id!==id)n.style.opacity='0.2';});});g.addEventListener('mouseleave',function(){svg.querySelectorAll('.graph-edge').forEach(function(e){e.style.opacity='0.3';e.style.strokeWidth='';});svg.querySelectorAll('.graph-node').forEach(function(n){n.style.opacity='1';});});});}
 
-function graphNodeClick(id){var G=window._graph;var n=G.nodes[G.nodeMap[id]];if(!n)return;var panel=document.getElementById('graphDetail');panel.style.display='block';var rel=[];G.edges.forEach(function(e){if(e.source===id)rel.push({id:e.target,type:e.type,weight:e.weight});else if(e.target===id)rel.push({id:e.source,type:e.type,weight:e.weight});});var qs=[];DATA.forEach(function(q){if((q.knowledge||[]).some(function(k){return k.indexOf(id)>=0||id.indexOf(k)>=0;}))qs.push(q);});var h='<div style="padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="font-size:16px;font-weight:700">'+n.label+'</h3><button onclick="document.getElementById(\'graphDetail\').style.display=\'none\'" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ts)">✕</button></div>';h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"><span style="font-size:11px;padding:3px 8px;border-radius:10px;background:'+n.color+'22;color:'+n.color+'">'+n.module+'</span><span style="font-size:11px;padding:3px 8px;border-radius:10px;background:#f0ede6;color:#666">📝 '+n.examCount+'次</span><span style="font-size:11px;padding:3px 8px;border-radius:10px;background:'+(n.viewed?'#d1fae5':'#fee2e2')+';color:'+(n.viewed?'#059669':'#dc2626')+'">'+(n.viewed?'已浏览':'未浏览')+'</span></div>';if(rel.length){h+='<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:var(--ts);margin-bottom:6px">🔗 关联知识点（'+rel.length+'）</div>';rel.sort(function(a,b){return b.weight-a.weight;});rel.forEach(function(r){var rn=G.nodes[G.nodeMap[r.id]];if(!rn)return;h+='<div onclick="graphNodeClick(\''+r.id.replace(/'/g,"\\'")+'\')" style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;margin:3px 0;background:#fafaf7;border-radius:6px;cursor:pointer;font-size:12px"><span>'+r.id+'</span><span style="font-size:10px;color:var(--ts)">'+(r.type==='evolution'?'演进':'共现')+' · '+r.weight+'</span></div>';});h+='</div>';}if(qs.length){h+='<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:var(--ts);margin-bottom:6px">📝 关联真题（'+qs.length+'道）</div>';qs.slice(0,8).forEach(function(q){h+='<div onclick="showExamQ(\''+q.id+'\')" style="padding:6px 8px;margin:3px 0;background:#fafaf7;border-radius:6px;cursor:pointer;font-size:11px"><strong>'+q.year+'#'+q.num+'</strong> '+q.type+' · '+q.question.substring(0,30)+'...</div>';});if(qs.length>8)h+='<div style="font-size:10px;color:var(--ts);text-align:center;padding:4px">还有'+(qs.length-8)+'道...</div>';h+='</div>';}h+='<div style="display:flex;gap:6px;margin-top:12px"><button onclick="navigateByKnowledge(\''+id.replace(/'/g,"\\'")+'\')" style="flex:1;padding:8px;background:var(--pu);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">📖 详情</button><button onclick="aiExplain(\''+id.replace(/'/g,"\\'")+'\')" style="flex:1;padding:8px;background:#059669;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">AI讲解</button><button onclick="var _G=window._graph;var rel2=_G.edges.filter(function(e){return e.source===\''+id+'\'||e.target===\''+id+'\'}).map(function(e){return e.source===\''+id+'\'?e.target:e.source});if(rel2.length)aiGraphRelate(\''+id+'\',rel2[0])" style="flex:1;padding:8px;background:var(--or);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">AI关系分析</button></div></div>';panel.innerHTML=h;}
+function graphNodeClick(id){var G=window._graph;var n=G.nodes[G.nodeMap[id]];if(!n)return;var panel=document.getElementById('graphDetail');panel.style.display='block';var rel=[];G.edges.forEach(function(e){if(e.source===id)rel.push({id:e.target,type:e.type,weight:e.weight});else if(e.target===id)rel.push({id:e.source,type:e.type,weight:e.weight});});var qs=[];DATA.forEach(function(q){if((q.knowledge||[]).some(function(k){return k.indexOf(id)>=0||id.indexOf(k)>=0;}))qs.push(q);});var h='<div style="padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="font-size:16px;font-weight:700">'+n.label+'</h3><button onclick="document.getElementById(\'graphDetail\').style.display=\'none\'" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ts)">✕</button></div>';h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"><span style="font-size:11px;padding:3px 8px;border-radius:10px;background:'+n.color+'22;color:'+n.color+'">'+n.module+'</span><span style="font-size:11px;padding:3px 8px;border-radius:10px;background:#f0ede6;color:var(--ts)">📝 '+n.examCount+'次</span><span style="font-size:11px;padding:3px 8px;border-radius:10px;background:'+(n.viewed?'#d1fae5':'#fee2e2')+';color:'+(n.viewed?'#059669':'#dc2626')+'">'+(n.viewed?'已浏览':'未浏览')+'</span></div>';if(rel.length){h+='<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:var(--ts);margin-bottom:6px">🔗 关联知识点（'+rel.length+'）</div>';rel.sort(function(a,b){return b.weight-a.weight;});rel.forEach(function(r){var rn=G.nodes[G.nodeMap[r.id]];if(!rn)return;h+='<div onclick="graphNodeClick(\''+r.id.replace(/'/g,"\\'")+'\')" style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;margin:3px 0;background:#fafaf7;border-radius:6px;cursor:pointer;font-size:12px"><span>'+r.id+'</span><span style="font-size:10px;color:var(--ts)">'+(r.type==='evolution'?'演进':'共现')+' · '+r.weight+'</span></div>';});h+='</div>';}if(qs.length){h+='<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:var(--ts);margin-bottom:6px">📝 关联真题（'+qs.length+'道）</div>';qs.slice(0,8).forEach(function(q){h+='<div onclick="showExamQ(\''+q.id+'\')" style="padding:6px 8px;margin:3px 0;background:#fafaf7;border-radius:6px;cursor:pointer;font-size:11px"><strong>'+q.year+'#'+q.num+'</strong> '+q.type+' · '+q.question.substring(0,30)+'...</div>';});if(qs.length>8)h+='<div style="font-size:10px;color:var(--ts);text-align:center;padding:4px">还有'+(qs.length-8)+'道...</div>';h+='</div>';}h+='<div style="display:flex;gap:6px;margin-top:12px"><button onclick="navigateByKnowledge(\''+id.replace(/'/g,"\\'")+'\')" style="flex:1;padding:8px;background:var(--pu);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">📖 详情</button><button onclick="aiExplain(\''+id.replace(/'/g,"\\'")+'\')" style="flex:1;padding:8px;background:#059669;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">AI讲解</button><button onclick="var _G=window._graph;var rel2=_G.edges.filter(function(e){return e.source===\''+id+'\'||e.target===\''+id+'\'}).map(function(e){return e.source===\''+id+'\'?e.target:e.source});if(rel2.length)aiGraphRelate(\''+id+'\',rel2[0])" style="flex:1;padding:8px;background:var(--or);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">AI关系分析</button></div></div>';panel.innerHTML=h;}
 
 function graphZoom(f){window._gz=Math.max(0.3,Math.min(3,window._gz*f));var vp=document.getElementById('graphViewport');if(vp)vp.setAttribute('transform','translate('+window._gpx+','+window._gpy+') scale('+window._gz+')');}
 function graphReset(){window._gz=1;window._gpx=0;window._gpy=0;var vp=document.getElementById('graphViewport');if(vp)vp.setAttribute('transform','');}
@@ -3210,13 +3210,13 @@ function showHotCategory(idx) {
     h += '<div style="display:flex;align-items:center;gap:8px">';
     h += '<span class="icon" style="background:#7c3aed;color:#fff;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px">📌</span>';
     h += '<h4 style="font-size:15px;font-weight:700">' + issue.topic + '</h4>';
-    h += '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#ede9fe;color:#7c3aed">' + issue.exam_type + '</span>';
+    h += '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(124,58,237,.15);color:#7c3aed">' + issue.exam_type + '</span>';
     h += '<span style="font-size:11px;color:#f59e0b">' + issue.probability + '</span>';
     h += '</div></div>';
     
     h += '<div class="know-pred-body" style="padding:16px">';
     h += '<div style="background:#fefce8;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:12px;line-height:1.7;color:#92400e">📰 ' + issue.news_brief + '</div>';
-    h += '<div style="background:linear-gradient(135deg,#ede9fe,#f5f3ff);padding:14px;border-radius:10px;border-left:4px solid #7c3aed;margin-bottom:12px">';
+    h += '<div style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.08));padding:14px;border-radius:10px;border-left:4px solid #7c3aed;margin-bottom:12px">';
     h += '<div style="font-size:11px;color:#7c3aed;font-weight:700;margin-bottom:6px">🎯 预测题目</div>';
     h += '<div style="font-size:14px;font-weight:600;line-height:1.7;color:#333">' + issue.predicted_question + '</div></div>';
     
@@ -3380,7 +3380,7 @@ function doSearch() {
       h += '<div onclick="navigateByKnowledge(\'' + r.name.replace(/'/g,"\\'") + '\')" style="padding:10px 14px;margin:4px 0;background:#fafaf7;border-radius:8px;cursor:pointer"><strong style="color:var(--bl)">' + r.name + '</strong><span style="font-size:11px;color:#999;margin-left:8px">' + (r.module||'') + '</span>';
       if (r.snippet) {
         var ps = r.snippet.indexOf(kw), s2 = Math.max(0, ps - 30), e2 = Math.min(r.snippet.length, ps + kw.length + 40);
-        h += '<br><span style="font-size:12px;color:#666">...' + r.snippet.substring(s2, e2).replace(kw, '<mark>' + kw + '</mark>') + '...</span>';
+        h += '<br><span style="font-size:12px;color:var(--ts)">...' + r.snippet.substring(s2, e2).replace(kw, '<mark>' + kw + '</mark>') + '...</span>';
       }
       h += '</div>';
     });
@@ -3393,7 +3393,7 @@ function doSearch() {
     hotResults.forEach(function(r) {
       h += '<div onclick="navigate(\'hot\')" style="padding:10px 14px;margin:4px 0;background:#fafaf7;border-radius:8px;cursor:pointer"><strong style="color:#7c3aed">' + r.title + '</strong>';
       var ps = r.snippet.indexOf(kw), s2 = Math.max(0, ps - 30), e2 = Math.min(r.snippet.length, ps + kw.length + 40);
-      h += '<br><span style="font-size:12px;color:#666">...' + r.snippet.substring(s2, e2).replace(kw, '<mark>' + kw + '</mark>') + '...</span>';
+      h += '<br><span style="font-size:12px;color:var(--ts)">...' + r.snippet.substring(s2, e2).replace(kw, '<mark>' + kw + '</mark>') + '...</span>';
       h += '</div>';
     });
     h += '</div></div>';
@@ -3404,7 +3404,7 @@ function doSearch() {
     h += '<div class="pcard"><div class="pcard-hdr"><h3>👨‍🏫 导师（' + profResults.length + '位）</h3></div><div class="pcard-body">';
     profResults.forEach(function(r) {
       h += '<div onclick="navigate(\'professors\')" style="padding:10px 14px;margin:4px 0;background:#fafaf7;border-radius:8px;cursor:pointer"><strong style="color:var(--gn)">' + r.name + '</strong><span style="font-size:11px;color:#999;margin-left:8px">' + (r.data.title||'') + '</span>';
-      if (r.data.research) h += '<br><span style="font-size:12px;color:#666">研究方向：' + r.data.research.join('、') + '</span>';
+      if (r.data.research) h += '<br><span style="font-size:12px;color:var(--ts)">研究方向：' + r.data.research.join('、') + '</span>';
       h += '</div>';
     });
     h += '</div></div>';
@@ -3468,7 +3468,7 @@ function clearChatHistory() {
   try { localStorage.removeItem('r434_chat'); } catch(e) {}
   var body = document.getElementById('chat-body');
   if (body) {
-    body.innerHTML = '<div class="chat-msg assistant" style="background:#f5f3ef;padding:12px 16px;border-radius:10px;font-size:13px;line-height:1.8">你好！我是人大434备考AI助手。<br><br>基于你的备考知识库，可以帮你解答任何国际贸易、国际投资、国际金融相关问题。试试问个理论对比或热点分析？</div>';
+    body.innerHTML = '<div class="chat-msg assistant" style="background:rgba(255,255,255,.04);padding:12px 16px;border-radius:10px;font-size:13px;line-height:1.8">你好！我是人大434备考AI助手。<br><br>基于你的备考知识库，可以帮你解答任何国际贸易、国际投资、国际金融相关问题。试试问个理论对比或热点分析？</div>';
   }
 }
 
