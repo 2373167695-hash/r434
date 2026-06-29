@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-29 00:50 · modular -->
+<!-- v2.1 · 2026-06-29 00:53 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -33,12 +33,12 @@
   --glass-highlight:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.02) 40%,transparent 70%);
   --glass-top-line:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
   --glass-rim:inset 0 0 0 1px rgba(255,255,255,.08);
-  /* Glass tiers — V1: bright + low blur */
+  /* Glass tiers — 三级分层 */
   --glass-hero-bg:rgba(255,255,255,.03);
   --glass-hero-blur:blur(8px) saturate(180%);
   --glass-hero-border:rgba(255,255,255,.2);
-  --glass-mid-bg:rgba(255,255,255,.03);
-  --glass-mid-blur:blur(8px) saturate(180%);
+  --glass-mid-bg:rgba(255,255,255,.04);
+  --glass-mid-blur:blur(16px) saturate(180%);
   --glass-mid-border:rgba(255,255,255,.16);
   --glass-sm-bg:rgba(255,255,255,.03);
   --glass-sm-blur:blur(8px) saturate(180%);
@@ -375,7 +375,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .ai-chat-hdr-btn:hover{background:rgba(255,255,255,.25);color:var(--t)}
 .ai-chat-body{flex:1 1 0;overflow-y:auto;min-height:0;padding:24px 24px 8px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1;scroll-behavior:smooth}
 .ai-chat-body::-webkit-scrollbar{width:6px}.ai-chat-body::-webkit-scrollbar-track{background:transparent}.ai-chat-body::-webkit-scrollbar-thumb{background:rgba(94,92,230,.15);border-radius:3px}.ai-chat-body::-webkit-scrollbar-thumb:hover{background:rgba(94,92,230,.3)}
-.ai-welcome{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+.ai-welcome{background:rgba(255,255,255,.08);backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);
   padding:20px 24px;border-radius:var(--radius-lg);font-size:14px;line-height:1.8;max-width:78%;align-self:flex-start;
   border:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .ai-welcome::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-top-line);pointer-events:none}
@@ -384,7 +384,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .ai-msg-user{align-self:flex-end;background:linear-gradient(135deg,#5e5ce6,#007aff);color:#fff;
   padding:14px 20px;border-radius:22px 22px 6px 22px;margin-left:auto;box-shadow:0 2px 12px rgba(94,92,230,.15)}
 .ai-msg-user::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);pointer-events:none}
-.ai-msg-bot{align-self:flex-start;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+.ai-msg-bot{align-self:flex-start;background:rgba(255,255,255,.08);backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);
   padding:18px 22px;border-radius:22px 22px 22px 6px;
   border:1px solid rgba(255,255,255,.08);box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .ai-msg-bot::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-top-line);pointer-events:none}
@@ -396,8 +396,8 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .ai-msg-bot pre code{background:none;padding:0}
 .ai-msg-err{align-self:flex-start;color:var(--r);font-size:13px;padding:12px 18px;background:rgba(255,69,58,.1);
   border-radius:var(--radius);border:1px solid rgba(255,69,58,.15)}
-.ai-loading{display:flex;align-items:center;gap:10px;padding:14px 20px;background:rgba(255,255,255,.06);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:22px 22px 22px 6px;
+.ai-loading{display:flex;align-items:center;gap:10px;padding:14px 20px;background:rgba(255,255,255,.08);
+  backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);border-radius:22px 22px 22px 6px;
   border:1px solid rgba(255,255,255,.08);font-size:13px;color:var(--ts);align-self:flex-start;max-width:200px}
 .ai-loading .ai-dot{width:7px;height:7px;border-radius:50%;background:var(--pu);display:inline-block;margin:0 2px;animation:aiBounce 1.4s infinite ease-in-out}
 .ai-loading .ai-dot:nth-child(1){animation-delay:0s}.ai-loading .ai-dot:nth-child(2){animation-delay:.2s}.ai-loading .ai-dot:nth-child(3){animation-delay:.4s}
