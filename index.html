@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-29 01:34 · modular -->
+<!-- v2.1 · 2026-06-29 02:59 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -188,7 +188,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .back-btn{display:none;background:none;border:none;border-radius:10px;padding:6px 12px;font-size:15px;cursor:pointer;color:var(--ts);min-width:32px;min-height:32px;transition:var(--transition)}
 .back-btn:hover{background:rgba(0,0,0,.04);color:var(--t)}
 .back-btn.show{display:block}
-.content{flex:1;overflow-y:auto;padding:76px 28px 48px;scroll-behavior:smooth}
+.content{flex:1;overflow-y:auto;padding:76px 16px 48px;scroll-behavior:smooth}
 .content::-webkit-scrollbar{width:6px}.content::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}.content::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.25)}
 .content-fade-in{animation:contentFade .4s cubic-bezier(.23,1,.32,1) both}
 @keyframes contentFade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
@@ -335,7 +335,7 @@ body.sb-collapsed .sidebar.open ~ .sidebar-backdrop{display:block}
 .qa2 .star{color:#f59e0b}.qa2 .done{color:var(--gn)}
 
 /* ===== QUIZ ===== */
-.quiz-box{background:var(--glass-mid-bg);backdrop-filter:url(#liquid-glass-filter) blur(0.5px) saturate(1.2);-webkit-backdrop-filter:url(#liquid-glass-filter) blur(0.5px) saturate(1.2);border-radius:var(--radius-lg);box-shadow:var(--sh),var(--glass-rim);padding:30px;max-width:720px;border:1px solid var(--glass-mid-border);position:relative;overflow:hidden}
+.quiz-box{background:var(--glass-mid-bg);backdrop-filter:url(#liquid-glass-filter) blur(0.5px) saturate(1.2);-webkit-backdrop-filter:url(#liquid-glass-filter) blur(0.5px) saturate(1.2);border-radius:var(--radius-lg);box-shadow:var(--sh),var(--glass-rim);padding:30px;width:100%;border:1px solid var(--glass-mid-border);position:relative;overflow:hidden}
 .quiz-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-top-line);pointer-events:none}
 .quiz-q{font-size:16px;line-height:1.9;margin:18px 0}
 .quiz-a{display:none;font-size:14px;line-height:1.9;color:rgba(255,255,255,.8);padding:16px;background:rgba(255,255,255,.04);border-radius:14px;border:1px solid rgba(255,255,255,.06);white-space:pre-wrap}
