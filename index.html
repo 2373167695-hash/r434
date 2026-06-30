@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-06-30 05:27 · modular -->
+<!-- v2.1 · 2026-06-30 05:32 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -1057,7 +1057,14 @@ function pushNav(p) {
 function goBack() {
   if (navStack.length > 1) {
     navStack.pop();
-    navigate(navStack[navStack.length-1], undefined, true);
+    var target = navStack[navStack.length-1];
+    // 回到主页时清除所有历史，主页是最低层级
+    if (!target) {
+      clearNavStack();
+      navigate('', undefined, true);
+    } else {
+      navigate(target, undefined, true);
+    }
   } else {
     navigate('', undefined, true);
   }
