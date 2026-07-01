@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v2.1 · 2026-07-01 10:04 · modular -->
+<!-- v2.1 · 2026-07-01 10:09 · modular -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -4192,20 +4192,20 @@ function showHotCategory(idx) {
     h += '</div></div>';
     
     h += '<div class="know-pred-body" style="padding:16px">';
-    h += '<div style="background:#fefce8;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:12px;line-height:1.7;color:#92400e">📰 ' + issue.news_brief + '</div>';
+    h += '<div style="background:rgba(255,255,255,.04);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:12px;line-height:1.7;color:var(--t)">📰 ' + issue.news_brief + '</div>';
     h += '<div style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.08));padding:14px;border-radius:10px;border-left:4px solid #7c3aed;margin-bottom:12px">';
     h += '<div style="font-size:11px;color:#7c3aed;font-weight:700;margin-bottom:6px">🎯 预测题目</div>';
-    h += '<div style="font-size:14px;font-weight:600;line-height:1.7;color:#333">' + issue.predicted_question + '</div></div>';
+    h += '<div style="font-size:14px;font-weight:600;line-height:1.7;color:var(--t)">' + issue.predicted_question + '</div></div>';
     
     h += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:var(--t);margin-bottom:6px">📝 答题框架</div>';
     (issue.answer_framework || []).forEach(function(af) {
-      h += '<div style="padding:6px 0;font-size:13px;line-height:1.7;border-bottom:1px dashed #f0f0f0">' + af + '</div>';
+      h += '<div style="padding:6px 0;font-size:13px;line-height:1.7;border-bottom:1px solid var(--bdr)">' + af + '</div>';
     });
     h += '</div>';
     
     h += '<div style="margin-bottom:12px"><div style="display:flex;flex-wrap:wrap;gap:6px">';
     (issue.key_terms || []).forEach(function(kt) {
-      h += '<span style="padding:3px 10px;background:#dbeafe;color:#1e40af;border-radius:12px;font-size:11px;cursor:pointer" onclick="event.stopPropagation();navigateByKnowledge(\'' + kt.replace(/'/g,"\\'") + '\')">' + kt + '</span>';
+      h += '<span style="padding:3px 10px;background:rgba(59,130,246,.12);color:#93c5fd;border-radius:12px;font-size:11px;cursor:pointer" onclick="event.stopPropagation();navigateByKnowledge(\'' + kt.replace(/'/g,"\\'") + '\')">' + kt + '</span>';
     });
     h += '</div></div>';
     
@@ -4216,13 +4216,13 @@ function showHotCategory(idx) {
     if (examQs.length) {
       h += '<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:var(--t);margin-bottom:6px">📜 关联真题</div>';
       examQs.forEach(function(q) {
-        h += '<div class="know-pred-ref" onclick="showExamQ(\'' + q.id + '\')" style="padding:6px 10px;margin:3px 0;background:#fafaf7;border-radius:6px;cursor:pointer;font-size:12px"><strong>' + q.year + '年#' + q.num + '</strong> ' + q.type + ' · ' + q.question.substring(0,30) + '...</div>';
+        h += '<div class="know-pred-ref" onclick="showExamQ(\'' + q.id + '\')" style="padding:6px 10px;margin:3px 0;background:rgba(255,255,255,.04);border-radius:6px;cursor:pointer;font-size:12px"><strong>' + q.year + '年#' + q.num + '</strong> ' + q.type + ' · ' + q.question.substring(0,30) + '...</div>';
       });
       h += '</div>';
     }
     
     if (issue.case_study) {
-      h += '<div style="background:#f0fdf4;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.7;color:#166534"><div style="font-weight:700;margin-bottom:4px">💼 案例</div>' + issue.case_study + '</div>';
+      h += '<div style="background:rgba(48,209,88,.06);padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.7;color:#4ade80"><div style="font-weight:700;margin-bottom:4px">💼 案例</div>' + issue.case_study + '</div>';
     }
     
     h += '<button class="ai-btn" onclick="aiHotExplain(\'' + idx + '_' + i + '\')" style="margin-top:12px">🧠 AI深入分析</button>';
